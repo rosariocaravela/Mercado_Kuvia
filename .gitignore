@@ -1,0 +1,34 @@
+# Dependências
+node_modules/
+package-lock.json
+
+# Variáveis de ambiente (NUNCA subir senhas)
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Uploads de utilizadores
+kuvia-backend/src/uploads/
+
+# Ficheiros de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build do frontend
+kuvia-frontend/dist/
+kuvia-frontend/build/
+
+# Cache
+.cache/
