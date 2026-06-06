@@ -1,0 +1,84 @@
+.register-gradient {
+  background: linear-gradient(
+    135deg, 
+    rgba(0, 108, 73, 0.9) 0%, 
+    rgba(108, 248, 187, 0.7) 100%
+  );
+}
+
+/* Animação de entrada */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main > section:first-child {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+main > section:last-child {
+  animation: slideInRight 0.6s ease-out;
+}
+
+/* Animação para os passos do formulário */
+form, .space-y-4 {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Foco nos inputs */
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 4px rgba(0, 80, 203, 0.1);
+}
+
+/* Scrollbar personalizada */
+section::-webkit-scrollbar {
+  width: 6px;
+}
+
+section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+section::-webkit-scrollbar-thumb {
+  background: #c2c6d8;
+  border-radius: 3px;
+}
+
+section::-webkit-scrollbar-thumb:hover {
+  background: #0050cb;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+  }
+}

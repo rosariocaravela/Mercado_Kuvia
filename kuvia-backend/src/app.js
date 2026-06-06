@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const sequelize = require('./config/database');
+// Importar models
+const { sequelize } = require('./models');
 
 const app = express();
 
@@ -11,13 +12,39 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true 
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Servir ficheiros estáticos
+app.use('/uploads', express.static('src/uploads'));
 
 // Rota de teste
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Servidor Kuvia Backend está a funcionar!' });
+  res.json({ 
+    status: 'OK', 
+    message: 'Servidor Kuvia Backend está a funcionar!',
+    timestamp: new Date().toISOString()
+  });
 });
+
+// Rota raiz
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Kuvia API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      users: '/api/users',
+      products: '/api/products',
+      stores: '/api/stores',
+      orders: '/api/orders'
+    }
+  });
+});
+
+// Rotas de autenticação
+app.use('/api/auth', require('./routes/authRoutes'));
 
 // Sincronizar Banco de Dados e Iniciar Servidor
 const PORT = process.env.PORT || 8080;
@@ -25,8 +52,11 @@ const PORT = process.env.PORT || 8080;
 sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
   .then(() => {
     console.log('✅ Banco de dados sincronizado com sucesso!');
+    
     app.listen(PORT, () => {
       console.log(`🚀 Servidor Kuvia rodando em http://localhost:${PORT}`);
+      console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+      console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`);
     });
   })
   .catch((error) => {
