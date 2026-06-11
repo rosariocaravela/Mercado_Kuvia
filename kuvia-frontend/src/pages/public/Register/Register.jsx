@@ -7,13 +7,13 @@ import './Register.css';
 export default function Register() {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
-  
+
   const [step, setStep] = useState(1); // 1: tipo, 2: dados, 3: loja (se seller)
   const [accountType, setAccountType] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -45,24 +45,24 @@ export default function Register() {
       setError('Por favor, preencha todos os campos obrigatórios.');
       return false;
     }
-    
+
     if (formData.password.length < 6) {
       setError('A senha deve ter pelo menos 6 caracteres.');
       return false;
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError('As senhas não coincidem.');
       return false;
     }
-    
+
     // Validar telefone de Moçambique
     const phoneRegex = /^(\+258)?[8][4-7]\d{7}$/;
     if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
       setError('Número de telefone inválido. Use o formato: +258 84 123 4567');
       return false;
     }
-    
+
     return true;
   };
 
@@ -118,7 +118,11 @@ export default function Register() {
         ? await registerSeller(payload)
         : await registerClient(payload);
 
-      login(response.token, response.user);
+      console.log(JSON.stringify(response, null, 2));
+      console.log("TOKEN:", response.data.token);
+      console.log("USER:", response.data.user);
+
+      login(response.data.token, response.data.user);
 
       if (accountType === 'seller') {
         navigate('/seller/dashboard');
@@ -133,14 +137,14 @@ export default function Register() {
   };
 
   const categories = [
-    'Eletrónicos',
-    'Moda e Vestuário',
-    'Beleza e Cosméticos',
-    'Alimentação',
-    'Agricultura',
-    'Móveis e Decoração',
-    'Serviços',
-    'Outros'
+    { label: 'Eletrónicos', value: 'ELETRONICOS' },
+    { label: 'Moda e Vestuário', value: 'MODA' },
+    { label: 'Beleza e Cosméticos', value: 'BELEZA' },
+    { label: 'Alimentação', value: 'ALIMENTACAO' },
+    { label: 'Agricultura', value: 'AGRICULTURA' },
+    { label: 'Móveis e Decoração', value: 'MOVEIS' },
+    { label: 'Serviços', value: 'SERVICOS' },
+    { label: 'Outros', value: 'OUTROS' }
   ];
 
   return (
@@ -148,15 +152,15 @@ export default function Register() {
       {/* Left Side: Marketing */}
       <section className="hidden md:flex md:w-1/2 lg:w-[60%] relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img 
-            className="w-full h-full object-cover" 
+          <img
+            className="w-full h-full object-cover"
             alt="Empreendedor moçambicano"
             src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=1200&h=900&fit=crop"
           />
           <div className="register-gradient absolute inset-0 mix-blend-multiply opacity-80"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-ink-black/60 to-transparent"></div>
         </div>
-        
+
         <div className="relative z-10 flex flex-col justify-between p-12 text-on-primary h-full">
           <div className="flex items-center gap-2">
             <span className="text-3xl">🛍️</span>
@@ -164,7 +168,7 @@ export default function Register() {
               Kuvia
             </span>
           </div>
-          
+
           <div className="max-w-xl">
             <h1 className="font-headline-xl text-headline-xl mb-6 text-white leading-tight">
               Comece a vender online em minutos.
@@ -173,7 +177,7 @@ export default function Register() {
               Crie a sua loja personalizada, partilhe no WhatsApp e comece a receber pedidos hoje mesmo. Sem complicações.
             </p>
           </div>
-          
+
           <div className="space-y-4">
             {['Criação rápida', 'Sem custos iniciais', 'Suporte local'].map((item, i) => (
               <div key={i} className="flex items-center gap-3 text-white/90">
@@ -186,7 +190,7 @@ export default function Register() {
           </div>
         </div>
       </section>
-      
+
       {/* Right Side: Register Form */}
       <section className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center bg-background-surface px-margin-page py-12 overflow-y-auto">
         <div className="max-w-[440px] mx-auto w-full">
@@ -196,7 +200,7 @@ export default function Register() {
               <span className="text-2xl">🛍️</span> Kuvia
             </h2>
           </div>
-          
+
           {/* Progress Indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
@@ -208,13 +212,13 @@ export default function Register() {
               </span>
             </div>
             <div className="h-2 bg-surface-container-low rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-primary transition-all duration-500"
                 style={{ width: `${(step / (accountType === 'seller' ? 3 : 2)) * 100}%` }}
               ></div>
             </div>
           </div>
-          
+
           <div className="mb-8">
             <h3 className="font-headline-md text-headline-md text-on-surface mb-2">
               {step === 1 && 'Que tipo de conta pretende?'}
@@ -227,7 +231,7 @@ export default function Register() {
               {step === 3 && 'Conte-nos mais sobre o seu negócio.'}
             </p>
           </div>
-          
+
           {/* Error Message */}
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-error-container text-error font-body-sm flex items-center gap-2">
@@ -235,23 +239,21 @@ export default function Register() {
               {error}
             </div>
           )}
-          
+
           {/* Step 1: Account Type */}
           {step === 1 && (
             <div className="space-y-4">
               <button
                 type="button"
                 onClick={() => { setAccountType('client'); setError(''); }}
-                className={`w-full p-6 rounded-2xl border-2 text-left transition-all ${
-                  accountType === 'client'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border-light hover:border-primary/50'
-                }`}
+                className={`w-full p-6 rounded-2xl border-2 text-left transition-all ${accountType === 'client'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border-light hover:border-primary/50'
+                  }`}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    accountType === 'client' ? 'bg-primary text-white' : 'bg-surface-container-low text-primary'
-                  }`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${accountType === 'client' ? 'bg-primary text-white' : 'bg-surface-container-low text-primary'
+                    }`}>
                     <span className="material-symbols-outlined">shopping_bag</span>
                   </div>
                   <div className="flex-1">
@@ -265,20 +267,18 @@ export default function Register() {
                   )}
                 </div>
               </button>
-              
+
               <button
                 type="button"
                 onClick={() => { setAccountType('seller'); setError(''); }}
-                className={`w-full p-6 rounded-2xl border-2 text-left transition-all ${
-                  accountType === 'seller'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border-light hover:border-primary/50'
-                }`}
+                className={`w-full p-6 rounded-2xl border-2 text-left transition-all ${accountType === 'seller'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border-light hover:border-primary/50'
+                  }`}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    accountType === 'seller' ? 'bg-primary text-white' : 'bg-surface-container-low text-primary'
-                  }`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${accountType === 'seller' ? 'bg-primary text-white' : 'bg-surface-container-low text-primary'
+                    }`}>
                     <span className="material-symbols-outlined">storefront</span>
                   </div>
                   <div className="flex-1">
@@ -294,7 +294,7 @@ export default function Register() {
               </button>
             </div>
           )}
-          
+
           {/* Step 2: Personal Data */}
           {step === 2 && (
             <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
@@ -306,7 +306,7 @@ export default function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     person
                   </span>
-                  <input 
+                  <input
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md"
                     id="name"
                     name="name"
@@ -318,7 +318,7 @@ export default function Register() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="font-label-md text-label-md text-on-surface" htmlFor="email">
                   Email *
@@ -327,7 +327,7 @@ export default function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     mail
                   </span>
-                  <input 
+                  <input
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md"
                     id="email"
                     name="email"
@@ -339,7 +339,7 @@ export default function Register() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="font-label-md text-label-md text-on-surface" htmlFor="phone">
                   Telefone *
@@ -348,7 +348,7 @@ export default function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     phone
                   </span>
-                  <input 
+                  <input
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md"
                     id="phone"
                     name="phone"
@@ -360,7 +360,7 @@ export default function Register() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="font-label-md text-label-md text-on-surface" htmlFor="password">
                   Palavra-passe *
@@ -369,7 +369,7 @@ export default function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     lock
                   </span>
-                  <input 
+                  <input
                     className="w-full pl-12 pr-12 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md"
                     id="password"
                     name="password"
@@ -379,7 +379,7 @@ export default function Register() {
                     onChange={handleChange}
                     required
                   />
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
@@ -390,7 +390,7 @@ export default function Register() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="font-label-md text-label-md text-on-surface" htmlFor="confirmPassword">
                   Confirmar Palavra-passe *
@@ -399,7 +399,7 @@ export default function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     lock_reset
                   </span>
-                  <input 
+                  <input
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md"
                     id="confirmPassword"
                     name="confirmPassword"
@@ -413,7 +413,7 @@ export default function Register() {
               </div>
             </form>
           )}
-          
+
           {/* Step 3: Store Data (only for sellers) */}
           {step === 3 && accountType === 'seller' && (
             <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
@@ -425,7 +425,7 @@ export default function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
                     storefront
                   </span>
-                  <input 
+                  <input
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md"
                     id="storeName"
                     name="storeName"
@@ -437,7 +437,7 @@ export default function Register() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="font-label-md text-label-md text-on-surface" htmlFor="storeCategory">
                   Categoria *
@@ -446,17 +446,20 @@ export default function Register() {
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors z-10">
                     category
                   </span>
-                  <select 
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md appearance-none"
+                  <select
                     id="storeCategory"
                     name="storeCategory"
                     value={formData.storeCategory}
                     onChange={handleChange}
                     required
+                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md appearance-none"
                   >
                     <option value="">Selecione uma categoria</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+
+                    {categories.map((cat) => (
+                      <option key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </option>
                     ))}
                   </select>
                   <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline pointer-events-none">
@@ -464,12 +467,12 @@ export default function Register() {
                   </span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="font-label-md text-label-md text-on-surface" htmlFor="storeDescription">
                   Descrição da Loja
                 </label>
-                <textarea 
+                <textarea
                   className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md resize-none"
                   id="storeDescription"
                   name="storeDescription"
@@ -481,7 +484,7 @@ export default function Register() {
               </div>
             </form>
           )}
-          
+
           {/* Navigation Buttons */}
           <div className="flex gap-3 mt-8">
             {step > 1 && (
@@ -504,12 +507,12 @@ export default function Register() {
                   <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                   A processar...
                 </span>
-              ) : step === 1 ? 'Continuar' : 
-                 step === 2 && accountType === 'seller' ? 'Continuar' : 
-                 'Criar Conta'}
+              ) : step === 1 ? 'Continuar' :
+                step === 2 && accountType === 'seller' ? 'Continuar' :
+                  'Criar Conta'}
             </button>
           </div>
-          
+
           {/* Footer Link */}
           <p className="text-center mt-6 font-body-sm text-body-sm text-on-surface-variant">
             Já tem uma conta?{' '}
@@ -518,7 +521,7 @@ export default function Register() {
             </Link>
           </p>
         </div>
-        
+
         {/* Page Footer */}
         <footer className="mt-12 text-center">
           <p className="font-label-sm text-label-sm text-outline">

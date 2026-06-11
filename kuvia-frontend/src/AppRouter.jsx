@@ -23,6 +23,7 @@ import SellerOrders from './pages/seller/Orders/Orders';
 import SellerAnalytics from './pages/seller/Analytics/Analytics';
 import SellerStoreSettings from './pages/seller/StoreSettings/StoreSettings';
 import SellerProfile from './pages/seller/Profile/SellerProfile';
+import CreateStoreWizard from './pages/seller/CreateStoreWizard'; // ← NOVO: Wizard de criação de loja
 
 // Páginas do Admin
 import AdminDashboard from './pages/admin/Dashboard/AdminDashboard';
@@ -76,6 +77,13 @@ function ProtectedRoute({ children, allowedRoles }) {
   return children;
 }
 
+function getDefaultAuthenticatedRoute(user) {
+  if (!user) return '/login';
+  if (user.role === 'ADMIN') return '/admin';
+  if (user.role === 'SELLER') return '/seller/dashboard';
+  return '/dashboard';
+}
+
 function AppRouter() {
   const { user, loading } = useContext(AuthContext);
 
@@ -87,8 +95,8 @@ function AppRouter() {
     <Routes>
       {/* Rotas Públicas */}
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
-      <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <Register />} />
+      <Route path="/login" element={user ? <Navigate to={getDefaultAuthenticatedRoute(user)} /> : <Login />} />
+      <Route path="/register" element={user ? <Navigate to={getDefaultAuthenticatedRoute(user)} /> : <Register />} />
       <Route path="/explore" element={<Explore />} />
       <Route path="/store/:slug" element={<Storefront />} />
 
@@ -180,6 +188,16 @@ function AppRouter() {
         element={
           <ProtectedRoute allowedRoles={['SELLER']}>
             <SellerProfile />
+          </ProtectedRoute>
+        }
+      />
+      
+      {/* ← NOVO: Rota do Wizard de Criação de Loja */}
+      <Route
+        path="/seller/criar-loja"
+        element={
+          <ProtectedRoute allowedRoles={['SELLER']}>
+            <CreateStoreWizard />
           </ProtectedRoute>
         }
       />

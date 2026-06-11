@@ -35,11 +35,11 @@ export default function Login() {
     try {
       const response = await loginUser(formData.identifier, formData.password);
 
-      login(response.token, response.user);
+      login(response.data.token, response.data.user);
 
-      if (response.user.role === 'ADMIN') {
+      if (response.data.user.role === 'ADMIN') {
         navigate('/admin');
-      } else if (response.user.role === 'SELLER') {
+      } else if (response.data.user.role === 'SELLER') {
         navigate('/seller/dashboard');
       } else {
         navigate('/dashboard');
