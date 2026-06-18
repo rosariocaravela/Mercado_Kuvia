@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '../../../../hooks/useAuth'; // ← Alterado aqui
 
 export default function WelcomeHeader({ storeSlug }) {
   const { user } = useAuth();
