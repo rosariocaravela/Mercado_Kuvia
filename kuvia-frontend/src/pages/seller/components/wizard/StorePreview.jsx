@@ -9,7 +9,6 @@ export default function StorePreview({ storeName, logoUrl, bannerUrl, categories
       </div>
       
       <div className="relative w-full rounded-xl overflow-hidden border border-border-light h-48">
-        {/* Banner Background */}
         <div className="absolute inset-0 bg-surface-container-highest flex items-center justify-center">
           {bannerUrl ? (
             <img src={bannerUrl} alt="Banner preview" className="w-full h-full object-cover" />
@@ -19,7 +18,6 @@ export default function StorePreview({ storeName, logoUrl, bannerUrl, categories
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         </div>
         
-        {/* Header Overlay */}
         <div className="absolute top-0 w-full h-14 px-4 flex items-center justify-between bg-white/80 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white border border-border-light flex items-center justify-center overflow-hidden">
@@ -33,23 +31,9 @@ export default function StorePreview({ storeName, logoUrl, bannerUrl, categories
               {storeName || 'Nome da Loja'}
             </span>
           </div>
-          <div className="flex gap-2">
-            {categories?.slice(0, 2).map((cat, i) => (
-              <span key={i} className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">
-                {cat}
-              </span>
-            ))}
-          </div>
-        </div>
-        
-        {/* Floating Content Placeholder */}
-        <div className="absolute bottom-4 left-6 flex flex-col gap-1">
-          <div className="h-4 w-32 bg-white/80 rounded" />
-          <div className="h-3 w-20 bg-white/60 rounded" />
         </div>
       </div>
       
-      {/* URL Preview */}
       <div className="bg-background-subtle border border-border-light rounded-lg p-4 flex items-center gap-3">
         <span className="material-symbols-outlined text-primary">link</span>
         <div>

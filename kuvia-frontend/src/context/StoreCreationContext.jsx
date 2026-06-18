@@ -1,28 +1,32 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { slugify } from '../utils/slugify';
 
 const StoreCreationContext = createContext();
 
 export const useStoreCreation = () => {
   const context = useContext(StoreCreationContext);
-  if (!context) {
-    throw new Error('useStoreCreation must be used within StoreCreationProvider');
-  }
+  if (!context) throw new Error('useStoreCreation deve ser usado dentro de StoreCreationProvider');
   return context;
 };
 
 export const StoreCreationProvider = ({ children }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [storeData, setStoreData] = useState({
-    name: '',
-    slug: '',
-    categories: [],
-    logo: null,
-    banner: null,
-    whatsapp: '',
-    description: ''
+    name: '', slug: '', categories: [], logo: null, banner: null,
+    whatsapp: '', description: '', theme: { primaryColor: '#0050cb' }
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [slugAvailable, setSlugAvailable] = useState(true);
+
+  // Actualizar slug automaticamente quando nome mudar
+  useEffect(() => {
+    if (storeData.name) {
+      const newSlug = slugify(storeData.name);
+      setStoreData(prev => ({ ...prev, slug: newSlug }));
+      checkSlugAvailability(newSlug).then(setSlugAvailable);
+    }
+  }, [storeData.name]);
 
   const updateStep = useCallback((step) => {
     if (step >= 1 && step <= 3) {
@@ -33,78 +37,48 @@ export const StoreCreationProvider = ({ children }) => {
 
   const updateStoreData = useCallback((field, value) => {
     setStoreData(prev => ({ ...prev, [field]: value }));
-    // Limpar erro do campo ao editar
     if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
+      setErrors(prev => { const e = { ...prev }; delete e[field]; return e; });
     }
   }, [errors]);
 
-  const addCategory = useCallback((category) => {
+  const toggleCategory = useCallback((categoryId) => {
     setStoreData(prev => {
-      if (prev.categories.includes(category)) {
-        return prev; // Já existe
-      }
-      return { ...prev, categories: [...prev.categories, category] };
+      const exists = prev.categories.includes(categoryId);
+      return {
+        ...prev, categories: exists
+          ? prev.categories.filter(c => c !== categoryId)
+          : [...prev.categories, categoryId]
+      };
     });
-  }, []);
-
-  const removeCategory = useCallback((category) => {
-    setStoreData(prev => ({
-      ...prev,
-      categories: prev.categories.filter(c => c !== category)
-    }));
   }, []);
 
   const validateStep = useCallback((step) => {
     const newErrors = {};
-    
     if (step === 1) {
-      if (!storeData.name?.trim()) {
-        newErrors.name = 'O nome da loja é obrigatório';
-      }
-      if (storeData.name?.trim().length < 3) {
-        newErrors.name = 'Mínimo de 3 caracteres';
-      }
+      if (!storeData.name?.trim()) newErrors.name = 'Nome obrigatório';
+      if (storeData.name?.trim().length < 3) newErrors.name = 'Mínimo 3 caracteres';
+      if (!slugAvailable) newErrors.slug = 'Este URL já está em uso';
     }
-    
-    if (step === 2) {
-      if (storeData.categories.length === 0) {
-        newErrors.categories = 'Selecione pelo menos uma categoria';
-      }
+    if (step === 2 && storeData.categories.length === 0) {
+      newErrors.categories = 'Seleccione pelo menos uma categoria';
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [storeData]);
+  }, [storeData, slugAvailable]);
 
   const reset = useCallback(() => {
     setCurrentStep(1);
-    setStoreData({
-      name: '', slug: '', categories: [], logo: null, banner: null, whatsapp: '', description: ''
-    });
+    setStoreData({ name: '', slug: '', categories: [], logo: null, banner: null, whatsapp: '', description: '', theme: { primaryColor: '#0050cb' } });
     setErrors({});
+    setSlugAvailable(true);
   }, []);
 
-  const value = {
-    currentStep,
-    storeData,
-    errors,
-    isSubmitting,
-    updateStep,
-    updateStoreData,
-    addCategory,
-    removeCategory,
-    validateStep,
-    setIsSubmitting,
-    reset
-  };
-
   return (
-    <StoreCreationContext.Provider value={value}>
+    <StoreCreationContext.Provider value={{
+      currentStep, storeData, errors, isSubmitting, slugAvailable,
+      updateStep, updateStoreData, toggleCategory, validateStep, setIsSubmitting, reset
+    }}>
       {children}
     </StoreCreationContext.Provider>
   );

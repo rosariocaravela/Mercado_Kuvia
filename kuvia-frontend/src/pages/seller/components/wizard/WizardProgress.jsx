@@ -1,6 +1,6 @@
 export default function WizardProgress({ currentStep, totalSteps = 3 }) {
   const progress = (currentStep / totalSteps) * 100;
-  const stepLabels = ['Configuração', 'Categorias', 'Personalização'];
+  const labels = ['Configuração', 'Categorias', 'Personalização'];
   
   return (
     <div className="mb-10">
@@ -10,7 +10,7 @@ export default function WizardProgress({ currentStep, totalSteps = 3 }) {
             Passo {currentStep} de {totalSteps}
           </p>
           <h2 className="font-headline-md text-headline-md text-ink-black">
-            {stepLabels[currentStep - 1]}
+            {labels[currentStep - 1]}
           </h2>
         </div>
         <span className="font-label-md text-on-surface-variant">{Math.round(progress)}%</span>
