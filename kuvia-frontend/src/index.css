@@ -38,3 +38,27 @@ details > summary::-webkit-details-marker {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
+
+/* Glass card effect */
+.glass-card { 
+  background: rgba(255, 255, 255, 0.7); 
+  backdrop-filter: blur(10px); 
+}
+
+/* Safe area para mobile */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Animações */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-in {
+  animation: fade-in 0.3s ease-out;
+}

@@ -132,4 +132,11 @@ const Product = sequelize.define('Product', {
   }
 });
 
+// Adicionar esta relação no Product.js:
+const Store = require('./Store');
+
+// ... dentro da definição do modelo Product:
+Product.belongsTo(Store, { foreignKey: 'storeId', as: 'store' });
+Store.hasMany(Product, { foreignKey: 'storeId', as: 'products' });
+
 module.exports = Product;

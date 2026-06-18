@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
+const Seller = require('./Seller');
 
 const Store = sequelize.define('Store', {
   id: {
@@ -7,110 +8,88 @@ const Store = sequelize.define('Store', {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
-  sellerId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: {
-      model: 'sellers',
-      key: 'id'
-    },
-    onDelete: 'CASCADE'
-  },
   name: {
-    type: DataTypes.STRING(150),
+    type: DataTypes.STRING(100),
     allowNull: false,
-    validate: {
-      notEmpty: { msg: 'O nome da loja é obrigatório' }
+    validate: { 
+      len: [3, 100],
+      notEmpty: true 
     }
   },
   slug: {
-    type: DataTypes.STRING(150),
+    type: DataTypes.STRING(100),
     allowNull: false,
-    unique: { msg: 'Esta URL já está em uso' },
-    validate: {
-      is: {
-        args: /^[a-z0-9-]+$/,
-        msg: 'A URL só pode conter letras minúsculas, números e hífens'
-      }
+    unique: true,
+    validate: { 
+      is: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, // Apenas letras minúsculas, números e hífens
+      notEmpty: true 
+    },
+    set(val) { 
+      // Garantir que o slug é sempre guardado em minúsculas
+      this.setDataValue('slug', val?.toLowerCase()); 
     }
   },
-  description: {
+  description: { 
     type: DataTypes.TEXT,
-    allowNull: true
+    validate: { len: [0, 500] }
   },
-  logo: {
-    type: DataTypes.STRING,
-    allowNull: true
+  whatsapp_number: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    validate: { 
+      is: /^(\+258)?[8][2-467]\d{7}$/, // Formato Moçambique: +258 8X XXX XXXX
+      notEmpty: true 
+    }
   },
-  banner: {
-    type: DataTypes.STRING,
-    allowNull: true
+  logo_url: { 
+    type: DataTypes.STRING(500),
+    validate: { isUrl: true }
   },
-  primaryColor: {
-    type: DataTypes.STRING(7),
-    defaultValue: '#0050cb'
+  banner_url: { 
+    type: DataTypes.STRING(500),
+    validate: { isUrl: true }
   },
-  secondaryColor: {
-    type: DataTypes.STRING(7),
-    defaultValue: '#006c49'
-  },
-  address: {
-    type: DataTypes.STRING(255),
-    allowNull: true
-  },
-  city: {
-    type: DataTypes.STRING(100),
-    allowNull: true
-  },
-  province: {
-    type: DataTypes.STRING(100),
-    defaultValue: 'Maputo'
-  },
-  coordinates: {
+  theme_config: {
     type: DataTypes.JSONB,
-    allowNull: true
-    // { lat: -25.9692, lng: 32.5732 }
+    defaultValue: { 
+      primaryColor: '#0050cb', 
+      secondaryColor: '#006c49',
+      fontFamily: 'Inter'
+    }
   },
-  category: {
-    type: DataTypes.STRING(100),
-    allowNull: true
+  is_active: { 
+    type: DataTypes.BOOLEAN, 
+    defaultValue: false,
+    comment: 'Loja só fica pública quando activa e aprovada'
   },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
-  },
-  isFeatured: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
-  views: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
-  },
-  followers: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
-  },
-  totalProducts: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
+  status: {
+    type: DataTypes.ENUM('PENDING', 'APPROVED', 'SUSPENDED', 'REJECTED'),
+    defaultValue: 'PENDING',
+    comment: 'Fluxo de aprovação: PENDING → APPROVED (por admin)'
   }
 }, {
   tableName: 'stores',
   timestamps: true,
-  hooks: {
-    beforeCreate: (store) => {
-      // Gerar slug automático se não fornecido
-      if (!store.slug && store.name) {
-        store.slug = store.name
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-      }
-    }
-  }
+  underscored: true,
+  indexes: [
+    { unique: true, fields: ['slug'] },
+    { fields: ['owner_id'] },
+    { fields: ['is_active', 'status'] },
+    { fields: ['createdAt'] }
+  ]
+});
+
+// Relações com Seller (1:1)
+Store.belongsTo(Seller, { 
+  foreignKey: 'owner_id', 
+  as: 'owner', 
+  onDelete: 'CASCADE',
+  constraints: true 
+});
+Seller.hasOne(Store, { 
+  foreignKey: 'owner_id', 
+  as: 'store',
+  constraints: true 
 });
 
 module.exports = Store;

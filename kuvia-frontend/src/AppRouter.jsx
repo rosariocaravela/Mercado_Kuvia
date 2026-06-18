@@ -23,7 +23,10 @@ import SellerOrders from './pages/seller/Orders/Orders';
 import SellerAnalytics from './pages/seller/Analytics/Analytics';
 import SellerStoreSettings from './pages/seller/StoreSettings/StoreSettings';
 import SellerProfile from './pages/seller/Profile/SellerProfile';
-import CreateStoreWizard from './pages/seller/CreateStoreWizard'; // ← NOVO: Wizard de criação de loja
+import CreateStoreWizard from './pages/seller/CreateStoreWizard';
+
+// ✨ NOVO: Layout do Vendedor (sidebar + topbar + bottom nav)
+import SellerLayout from './components/layout/SellerLayout';
 
 // Páginas do Admin
 import AdminDashboard from './pages/admin/Dashboard/AdminDashboard';
@@ -54,6 +57,19 @@ function NotFound() {
           Voltar para Home
         </a>
       </div>
+    </div>
+  );
+}
+
+// Placeholder para páginas em desenvolvimento
+function ComingSoon({ title }) {
+  return (
+    <div className="px-margin-page py-16 flex flex-col items-center justify-center text-center">
+      <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center mb-4">
+        <span className="material-symbols-outlined text-3xl text-primary">construction</span>
+      </div>
+      <h2 className="font-headline-md text-ink-black mb-2">{title}</h2>
+      <p className="font-body-md text-ink-gray">Esta página está em desenvolvimento. Em breve!</p>
     </div>
   );
 }
@@ -93,14 +109,18 @@ function AppRouter() {
 
   return (
     <Routes>
-      {/* Rotas Públicas */}
+      {/* ============================================
+          ROTAS PÚBLICAS
+      ============================================ */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={user ? <Navigate to={getDefaultAuthenticatedRoute(user)} /> : <Login />} />
       <Route path="/register" element={user ? <Navigate to={getDefaultAuthenticatedRoute(user)} /> : <Register />} />
       <Route path="/explore" element={<Explore />} />
       <Route path="/store/:slug" element={<Storefront />} />
 
-      {/* Rotas do Cliente */}
+      {/* ============================================
+          ROTAS DO CLIENTE
+      ============================================ */}
       <Route
         path="/dashboard"
         element={
@@ -142,57 +162,39 @@ function AppRouter() {
         }
       />
 
-      {/* Rotas do Vendedor */}
+      {/* ============================================
+          ROTAS DO VENDEDOR - COM LAYOUT (Sidebar + TopBar)
+      ============================================ */}
       <Route
-        path="/seller/dashboard"
+        path="/seller"
         element={
           <ProtectedRoute allowedRoles={['SELLER']}>
-            <SellerDashboard />
+            <SellerLayout />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/seller/products"
-        element={
-          <ProtectedRoute allowedRoles={['SELLER']}>
-            <SellerProducts />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/orders"
-        element={
-          <ProtectedRoute allowedRoles={['SELLER']}>
-            <SellerOrders />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/analytics"
-        element={
-          <ProtectedRoute allowedRoles={['SELLER']}>
-            <SellerAnalytics />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/settings"
-        element={
-          <ProtectedRoute allowedRoles={['SELLER']}>
-            <SellerStoreSettings />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/profile"
-        element={
-          <ProtectedRoute allowedRoles={['SELLER']}>
-            <SellerProfile />
-          </ProtectedRoute>
-        }
-      />
-      
-      {/* ← NOVO: Rota do Wizard de Criação de Loja */}
+      >
+        {/* Rota padrão: /seller → redireciona para /seller/dashboard */}
+        <Route index element={<Navigate to="/seller/dashboard" replace />} />
+        
+        {/* Dashboard principal */}
+        <Route path="dashboard" element={<SellerDashboard />} />
+        
+        {/* Páginas em desenvolvimento (placeholders) */}
+        <Route path="products" element={<ComingSoon title="Gestão de Produtos" />} />
+        <Route path="products/new" element={<ComingSoon title="Criar Novo Produto" />} />
+        <Route path="orders" element={<ComingSoon title="Gestão de Encomendas" />} />
+        <Route path="customers" element={<ComingSoon title="Gestão de Clientes" />} />
+        <Route path="analytics" element={<ComingSoon title="Análise e Estatísticas" />} />
+        <Route path="design" element={<ComingSoon title="Design da Loja" />} />
+        <Route path="marketing" element={<ComingSoon title="Marketing e Campanhas" />} />
+        <Route path="settings" element={<ComingSoon title="Definições da Loja" />} />
+        <Route path="more" element={<ComingSoon title="Mais Opções" />} />
+        
+        {/* Redirecionar /seller/store para a loja pública do vendedor */}
+        <Route path="store" element={<Navigate to="/store/minha-loja" replace />} />
+      </Route>
+
+      {/* ✨ Wizard de criação de loja (SEM sidebar - layout próprio) */}
       <Route
         path="/seller/criar-loja"
         element={
@@ -202,7 +204,9 @@ function AppRouter() {
         }
       />
 
-      {/* Rotas do Admin */}
+      {/* ============================================
+          ROTAS DO ADMIN
+      ============================================ */}
       <Route
         path="/admin"
         element={
@@ -236,7 +240,9 @@ function AppRouter() {
         }
       />
 
-      {/* Rota de Página Não Encontrada */}
+      {/* ============================================
+          ROTA DE PÁGINA NÃO ENCONTRADA
+      ============================================ */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
