@@ -63,6 +63,12 @@ const Store = sequelize.define('Store', {
     }
   },
 
+  sellerId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Chave estrangeira para o vendedor proprietário da loja'
+  },
+
   theme_config: {
     type: DataTypes.JSONB,
     allowNull: true,

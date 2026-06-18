@@ -10,7 +10,7 @@ const User = require('../models/User');
  */
 exports.createStore = async (sellerId, storeData, files = {}) => {
   // Verificar se vendedor já tem loja
-  const existingStore = await Store.findOne({ where: { owner_id: sellerId } });
+  const existingStore = await Store.findOne({ where: { sellerId: sellerId } });
   if (existingStore) {
     throw new Error('Este vendedor já possui uma loja. Cada vendedor pode ter apenas uma loja.');
   }
@@ -18,7 +18,7 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
   // Preparar dados para criação
   const data = {
     ...storeData,
-    owner_id: sellerId,
+    sellerId: sellerId,
     is_active: false, // Requer aprovação admin
     status: 'PENDING'
   };

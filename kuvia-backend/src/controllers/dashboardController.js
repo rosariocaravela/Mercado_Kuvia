@@ -46,7 +46,7 @@ exports.getStats = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Vendedor não encontrado' });
     }
     
-    const store = await Store.findOne({ where: { owner_id: seller.id } });
+    const store = await Store.findOne({ where: { sellerId: seller.id } });
     if (!store) {
       return res.status(404).json({ success: false, message: 'Loja não encontrada' });
     }
@@ -83,7 +83,7 @@ exports.getSalesTrend = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Vendedor não encontrado' });
     }
     
-    const store = await Store.findOne({ where: { owner_id: seller.id } });
+    const store = await Store.findOne({ where: { sellerId: seller.id } });
     if (!store) {
       return res.status(404).json({ success: false, message: 'Loja não encontrada' });
     }
@@ -120,7 +120,7 @@ exports.getActivity = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Vendedor não encontrado' });
     }
     
-    const store = await Store.findOne({ where: { owner_id: seller.id } });
+    const store = await Store.findOne({ where: { sellerId: seller.id } });
     if (!store) {
       return res.status(404).json({ success: false, message: 'Loja não encontrada' });
     }
