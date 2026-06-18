@@ -63,6 +63,7 @@ Message.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
 Message.belongsTo(User, { foreignKey: 'receiverId', as: 'receiver' });
 
 module.exports = {
+  sequelize,
   User,
   Client,
   Seller,
