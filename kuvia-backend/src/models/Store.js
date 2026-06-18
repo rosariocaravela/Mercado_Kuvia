@@ -32,30 +32,40 @@ const Store = sequelize.define('Store', {
 
   description: {
     type: DataTypes.TEXT,
-    validate: { len: [0, 500] }
+    allowNull: true,
+    validate: {
+      len: [0, 500]
+    }
   },
 
   whatsapp_number: {
     type: DataTypes.STRING(20),
     allowNull: false,
     validate: {
-      is: /^(\+258)?[8][2-467]\d{7}$/,
+      is: /^(\+258)?[8][2-7]\d{7}$/,
       notEmpty: true
     }
   },
 
   logo_url: {
     type: DataTypes.STRING(500),
-    validate: { isUrl: true }
+    allowNull: true,
+    validate: {
+      isUrl: true
+    }
   },
 
   banner_url: {
     type: DataTypes.STRING(500),
-    validate: { isUrl: true }
+    allowNull: true,
+    validate: {
+      isUrl: true
+    }
   },
 
   theme_config: {
     type: DataTypes.JSONB,
+    allowNull: true,
     defaultValue: {
       primaryColor: '#0050cb',
       secondaryColor: '#006c49',
@@ -69,15 +79,15 @@ const Store = sequelize.define('Store', {
   },
 
   status: {
-    type: DataTypes.ENUM,
-    values: ['PENDING', 'APPROVED', 'SUSPENDED', 'REJECTED'],
+    type: DataTypes.ENUM('PENDING', 'APPROVED', 'SUSPENDED', 'REJECTED'),
     allowNull: false,
     defaultValue: 'PENDING'
   }
 }, {
   tableName: 'stores',
-  timestamps: true,
-  underscored: true
+
+  // 🔥 IMPORTANTE: tua tabela NÃO tem timestamps
+  timestamps: false
 });
 
 module.exports = Store;

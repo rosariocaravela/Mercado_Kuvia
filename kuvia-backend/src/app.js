@@ -49,7 +49,7 @@ app.use('/api', require('./routes'));
 // Sincronizar Banco de Dados e Iniciar Servidor
 const PORT = process.env.PORT || 8080;
 
-sequelize.sync()
+sequelize.sync({ alter: true })
   .then(() => {
     console.log('✅ Banco de dados sincronizado com sucesso!');
     
