@@ -5,14 +5,35 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 segundos
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('kuvia_token');
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Interceptor para adicionar token automaticamente
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('kuvia_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
+
+// Interceptor para tratar erros de resposta
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expirado ou inválido - fazer logout
+      localStorage.removeItem('kuvia_token');
+      localStorage.removeItem('kuvia_user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

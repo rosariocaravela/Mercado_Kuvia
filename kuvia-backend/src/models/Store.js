@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');
-const Seller = require('./Seller');
+const sequelize = require('../config/database');
 
 const Store = sequelize.define('Store', {
   id: {
@@ -8,88 +7,77 @@ const Store = sequelize.define('Store', {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
+
   name: {
     type: DataTypes.STRING(100),
     allowNull: false,
-    validate: { 
+    validate: {
       len: [3, 100],
-      notEmpty: true 
+      notEmpty: true
     }
   },
+
   slug: {
     type: DataTypes.STRING(100),
     allowNull: false,
     unique: true,
-    validate: { 
-      is: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, // Apenas letras minúsculas, números e hífens
-      notEmpty: true 
+    validate: {
+      is: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      notEmpty: true
     },
-    set(val) { 
-      // Garantir que o slug é sempre guardado em minúsculas
-      this.setDataValue('slug', val?.toLowerCase()); 
+    set(value) {
+      this.setDataValue('slug', value?.toLowerCase());
     }
   },
-  description: { 
+
+  description: {
     type: DataTypes.TEXT,
     validate: { len: [0, 500] }
   },
+
   whatsapp_number: {
     type: DataTypes.STRING(20),
     allowNull: false,
-    validate: { 
-      is: /^(\+258)?[8][2-467]\d{7}$/, // Formato Moçambique: +258 8X XXX XXXX
-      notEmpty: true 
+    validate: {
+      is: /^(\+258)?[8][2-467]\d{7}$/,
+      notEmpty: true
     }
   },
-  logo_url: { 
+
+  logo_url: {
     type: DataTypes.STRING(500),
     validate: { isUrl: true }
   },
-  banner_url: { 
+
+  banner_url: {
     type: DataTypes.STRING(500),
     validate: { isUrl: true }
   },
+
   theme_config: {
     type: DataTypes.JSONB,
-    defaultValue: { 
-      primaryColor: '#0050cb', 
+    defaultValue: {
+      primaryColor: '#0050cb',
       secondaryColor: '#006c49',
       fontFamily: 'Inter'
     }
   },
-  is_active: { 
-    type: DataTypes.BOOLEAN, 
-    defaultValue: false,
-    comment: 'Loja só fica pública quando activa e aprovada'
+
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   },
+
   status: {
-    type: DataTypes.ENUM('PENDING', 'APPROVED', 'SUSPENDED', 'REJECTED'),
-    defaultValue: 'PENDING',
-    comment: 'Fluxo de aprovação: PENDING → APPROVED (por admin)'
+    type: DataTypes.ENUM,
+    values: ['PENDING', 'APPROVED', 'SUSPENDED', 'REJECTED'],
+    allowNull: false,
+    defaultValue: 'PENDING'
   }
 }, {
   tableName: 'stores',
   timestamps: true,
-  underscored: true,
-  indexes: [
-    { unique: true, fields: ['slug'] },
-    { fields: ['owner_id'] },
-    { fields: ['is_active', 'status'] },
-    { fields: ['createdAt'] }
-  ]
-});
-
-// Relações com Seller (1:1)
-Store.belongsTo(Seller, { 
-  foreignKey: 'owner_id', 
-  as: 'owner', 
-  onDelete: 'CASCADE',
-  constraints: true 
-});
-Seller.hasOne(Store, { 
-  foreignKey: 'owner_id', 
-  as: 'store',
-  constraints: true 
+  underscored: true
 });
 
 module.exports = Store;

@@ -1,7 +1,22 @@
-// Importar rotas de lojas
+const express = require('express');
+const router = express.Router();
+
+// Importar rotas existentes
+const authRoutes = require('./authRoutes');
+const userRoutes = require('./userRoutes');
 const storeRoutes = require('./storeRoutes');
+const productRoutes = require('./productRoutes');
+
+// ✨ NOVO: Importar rotas do dashboard
+const dashboardRoutes = require('./dashboardRoutes');
 
 // Registar rotas
-router.use('/stores', storeRoutes); // ← NOVO
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
+router.use('/stores', storeRoutes);
+router.use('/products', productRoutes);
+
+// ✨ NOVO: Rotas do dashboard do vendedor
+router.use('/seller/dashboard', dashboardRoutes);
 
 module.exports = router;

@@ -43,13 +43,13 @@ app.get('/', (req, res) => {
   });
 });
 
-// Rotas de autenticação
-app.use('/api/auth', require('./routes/authRoutes'));
+// Rotas de API principais
+app.use('/api', require('./routes'));
 
 // Sincronizar Banco de Dados e Iniciar Servidor
 const PORT = process.env.PORT || 8080;
 
-sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
+sequelize.sync()
   .then(() => {
     console.log('✅ Banco de dados sincronizado com sucesso!');
     

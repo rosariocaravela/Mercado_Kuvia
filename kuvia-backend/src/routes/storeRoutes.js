@@ -3,7 +3,7 @@ const router = express.Router();
 const storeController = require('../controllers/storeController');
 const { createStore, updateStore, searchStores } = require('../validators/storeValidator');
 const { checkStoreActive, checkStoreOwnership, validateSlugAvailability } = require('../middlewares/storeMiddleware');
-const { authenticateToken, authorizeRoles } = require('../middlewares/authMiddleware');
+const { authenticate, authorize } = require('../middlewares/authMiddleware');
 const upload = require('../config/upload'); // Configuração multer
 
 // 🔓 ROTAS PÚBLICAS (não requerem autenticação)
@@ -24,8 +24,8 @@ router.get('/check-slug', validateSlugAvailability, storeController.checkSlug);
 
 // Criar nova loja (apenas vendedores)
 router.post('/', 
-  authenticateToken, 
-  authorizeRoles('SELLER'),
+  authenticate, 
+  authorize('SELLER'),
   createStore,
   upload.fields([
     { name: 'logo', maxCount: 1 },
@@ -36,8 +36,8 @@ router.post('/',
 
 // Actualizar loja existente (apenas dono)
 router.put('/:id', 
-  authenticateToken, 
-  authorizeRoles('SELLER'),
+  authenticate, 
+  authorize('SELLER'),
   checkStoreOwnership,
   updateStore,
   upload.fields([

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { slugify } from '../utils/slugify';
+import { slugify, checkSlugAvailability } from '../utils/slugify';
 
 const StoreCreationContext = createContext();
 
@@ -21,10 +21,15 @@ export const StoreCreationProvider = ({ children }) => {
 
   // Actualizar slug automaticamente quando nome mudar
   useEffect(() => {
-    if (storeData.name) {
-      const newSlug = slugify(storeData.name);
-      setStoreData(prev => ({ ...prev, slug: newSlug }));
+    if (!storeData.name) return;
+
+    const newSlug = slugify(storeData.name);
+    setStoreData(prev => ({ ...prev, slug: newSlug }));
+
+    if (newSlug) {
       checkSlugAvailability(newSlug).then(setSlugAvailable);
+    } else {
+      setSlugAvailable(true);
     }
   }, [storeData.name]);
 

@@ -223,3 +223,19 @@ exports.isSlugAvailable = async (slug, excludeStoreId = null) => {
   const exists = await Store.findOne({ where });
   return !exists;
 };
+
+/**
+ * Obter loja do vendedor actual
+ */
+exports.getSellerStore = async (sellerId) => {
+  return Store.findOne({
+    where: { owner_id: sellerId },
+    include: [
+      { 
+        model: Seller, 
+        as: 'owner',
+        include: [{ model: User, as: 'user', attributes: ['fullName', 'email'] }]
+      }
+    ]
+  });
+};
