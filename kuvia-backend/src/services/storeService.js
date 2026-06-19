@@ -57,7 +57,7 @@ exports.getStorePublicData = async (slug) => {
       }
     ],
     attributes: { 
-      exclude: ['owner_id', 'is_active', 'status', 'createdAt', 'updatedAt'] 
+      exclude: ['sellerId', 'is_active', 'status', 'createdAt', 'updatedAt'] 
     }
   });
 
@@ -229,7 +229,7 @@ exports.isSlugAvailable = async (slug, excludeStoreId = null) => {
  */
 exports.getSellerStore = async (sellerId) => {
   return Store.findOne({
-    where: { owner_id: sellerId },
+    where: { sellerId },
     include: [
       { 
         model: Seller, 

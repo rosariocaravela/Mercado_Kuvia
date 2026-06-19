@@ -5,7 +5,7 @@ import WizardProgress from '../components/wizard/WizardProgress';
 
 export default function Step1StoreName({ onNext, onBack }) {
   const { storeData, updateStoreData, errors, slugAvailable, validateStep } = useStoreCreation();
-  
+
   const handleNameChange = (e) => {
     const name = e.target.value;
     updateStoreData('name', name);
@@ -19,7 +19,7 @@ export default function Step1StoreName({ onNext, onBack }) {
   return (
     <div className="w-full max-w-[560px] animate-in fade-in slide-in-from-bottom-4 duration-500">
       <WizardProgress currentStep={1} />
-      
+
       <div className="bg-background-surface border border-border-light rounded-xl shadow-sm p-8 md:p-10">
         <div className="mb-8">
           <h1 className="font-headline-lg text-ink-black mb-3">Vamos dar um nome à sua loja</h1>

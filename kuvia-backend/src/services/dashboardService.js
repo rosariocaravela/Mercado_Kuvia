@@ -19,13 +19,13 @@ const User = require('../models/User');
  */
 exports.getDashboardData = async (userId) => {
   const seller = await Seller.findOne({ where: { userId } });
-  
+
   if (!seller) {
     throw new Error('Perfil de vendedor não encontrado');
   }
 
-  const store = await Store.findOne({ where: { owner_id: seller.id } });
-  
+  const store = await Store.findOne({ where: { sellerId: seller.id } });
+
   if (!store) {
     throw new Error('Loja não encontrada. Crie uma loja primeiro.');
   }
@@ -103,7 +103,7 @@ exports.getStoreStats = async (storeId) => {
     }
   }) || 0;
 
-  const viewsChange = previousViews > 0 
+  const viewsChange = previousViews > 0
     ? Math.round(((totalViews - previousViews) / previousViews) * 100)
     : 0;
 
@@ -143,7 +143,7 @@ exports.getSalesTrend = async (storeId, days = 7) => {
     const date = new Date();
     date.setDate(date.getDate() - i);
     const dateStr = date.toISOString().split('T')[0];
-    
+
     labels.push(exports.formatDateLabel(date, days));
     values.push(salesMap.get(dateStr) || 0);
   }
@@ -221,17 +221,17 @@ exports.getRecentActivities = async (storeId, limit = 10) => {
 
 exports.formatDateLabel = (date, days) => {
   const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-  
+
   if (days <= 7) {
     return daysOfWeek[date.getDay()];
   }
-  
+
   return `${date.getDate()}/${date.getMonth() + 1}`;
 };
 
 exports.timeAgo = (date) => {
   const seconds = Math.floor((new Date() - date) / 1000);
-  
+
   const intervals = [
     { label: 'ano', seconds: 31536000 },
     { label: 'mês', seconds: 2592000 },
@@ -247,6 +247,6 @@ exports.timeAgo = (date) => {
       return `${count} ${interval.label}${count > 1 ? 's' : ''} atrás`;
     }
   }
-  
+
   return 'agora mesmo';
 };
