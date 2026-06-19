@@ -27,7 +27,30 @@ exports.getDashboardData = async (userId) => {
   const store = await Store.findOne({ where: { sellerId: seller.id } });
 
   if (!store) {
-    throw new Error('Loja não encontrada. Crie uma loja primeiro.');
+    return {
+      store: null,
+      seller: {
+        id: seller.id,
+        businessName: seller.businessName,
+        rating: seller.rating,
+        verified: seller.verified
+      },
+      stats: {
+        totalProducts: 0,
+        totalViews: 0,
+        totalOrders: 0,
+        revenue: 0,
+        lowStockProducts: 0,
+        viewsChange: '0%'
+      },
+      salesData: {
+        labels: [],
+        values: [],
+        period: '7days'
+      },
+      activities: [],
+      recentProducts: []
+    };
   }
 
   const stats = await this.getStoreStats(store.id);

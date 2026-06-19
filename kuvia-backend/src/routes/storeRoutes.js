@@ -1,30 +1,35 @@
 const express = require('express');
 const router = express.Router();
+
 const storeController = require('../controllers/storeController');
 const { createStore, updateStore, searchStores } = require('../validators/storeValidator');
 const { checkStoreActive, checkStoreOwnership, validateSlugAvailability } = require('../middlewares/storeMiddleware');
 const { authenticate, authorize } = require('../middlewares/authMiddleware');
-const upload = require('../config/upload'); // Configuração multer
+const upload = require('../config/upload');
 
-// 🔓 ROTAS PÚBLICAS (não requerem autenticação)
 
-// Pesquisa global de lojas (para página /explore)
-router.get('/', searchStores, storeController.searchStores);
+// 🔓 ROTAS PÚBLICAS
 
-// Obter dados públicos de uma loja por slug
-router.get('/:slug', checkStoreActive, storeController.getStoreBySlug);
+// IMPORTANTE: rotas específicas SEMPRE antes das dinâmicas
 
-// Listar produtos de uma loja
-router.get('/:slug/products', checkStoreActive, storeController.getStoreProducts);
-
-// Verificar disponibilidade de slug (para preview em tempo real no frontend)
+// Verificar slug (TEM QUE VIR PRIMEIRO)
 router.get('/check-slug', validateSlugAvailability, storeController.checkSlug);
 
-// 🔐 ROTAS PROTEGIDAS (requer autenticação + papel SELLER)
+// Pesquisa de lojas
+router.get('/', searchStores, storeController.searchStores);
 
-// Criar nova loja (apenas vendedores)
-router.post('/', 
-  authenticate, 
+// Produtos de loja
+router.get('/:slug/products', checkStoreActive, storeController.getStoreProducts);
+
+// Loja por slug (rota dinâmica sempre por último)
+router.get('/:slug', checkStoreActive, storeController.getStoreBySlug);
+
+
+// 🔐 ROTAS PROTEGIDAS
+
+router.post(
+  '/',
+  authenticate,
   authorize('SELLER'),
   createStore,
   upload.fields([
@@ -34,9 +39,9 @@ router.post('/',
   storeController.createStore
 );
 
-// Actualizar loja existente (apenas dono)
-router.put('/:id', 
-  authenticate, 
+router.put(
+  '/:id',
+  authenticate,
   authorize('SELLER'),
   checkStoreOwnership,
   updateStore,
