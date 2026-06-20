@@ -5,9 +5,7 @@ export const storeService = {
    * Criar nova loja
    */
   createStore: async (formData) => {
-    const response = await api.post('/stores', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    const response = await api.post('/stores', formData);
     return response.data;
   },
 
@@ -39,7 +37,7 @@ export const storeService = {
    * Verificar disponibilidade de slug
    */
   checkSlug: async (slug) => {
-    const response = await api.get(`/stores/check-slug?slug=${slug}`);
+    const response = await api.get(`/stores/slug/check?slug=${slug}`);
     return response.data;
   },
 

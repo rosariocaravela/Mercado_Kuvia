@@ -120,7 +120,47 @@ exports.getStoreProducts = async (req, res) => {
 };
 
 // =====================================================
-// 🔍 SEARCH STORES
+// � ATUALIZAR LOJA
+// =====================================================
+exports.updateStore = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array().map(e => ({
+          field: e.param,
+          message: e.msg
+        }))
+      });
+    }
+
+    const storeId = req.params.id;
+    const updates = req.body;
+
+    const updatedStore = await storeService.updateStore(
+      storeId,
+      updates,
+      req.files
+    );
+
+    return res.json({
+      success: true,
+      message: 'Loja atualizada com sucesso.',
+      data: updatedStore
+    });
+  } catch (error) {
+    console.error('❌ updateStore error:', error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao atualizar loja.'
+    });
+  }
+};
+
+// =====================================================
+// �🔍 SEARCH STORES
 // =====================================================
 exports.searchStores = async (req, res) => {
   try {

@@ -28,7 +28,7 @@ export const isValidSlug = (slug) => {
 export const checkSlugAvailability = async (slug) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/stores/check-slug?slug=${slug}`,
+      `${import.meta.env.VITE_API_BASE_URL}/stores/slug/check?slug=${slug}`,
       { headers: { 'Content-Type': 'application/json' } }
     );
     const data = await response.json();

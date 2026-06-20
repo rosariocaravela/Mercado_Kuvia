@@ -18,8 +18,12 @@ exports.createStore = [
   body('whatsapp_number')
     .trim()
     .notEmpty().withMessage('Número WhatsApp é obrigatório')
-    .matches(/^(\+258)?[8][2-467]\d{7}$/).withMessage('Formato inválido. Ex: +258 84 123 4567')
-    .customSanitizer(val => val.replace(/\D/g, '').startsWith('258') ? val : `258${val.replace(/\D/g, '')}`),
+    .customSanitizer((val) => {
+      const digits = val.replace(/\D/g, '');
+      if (!digits) return val;
+      return digits.startsWith('258') ? digits : `258${digits}`;
+    })
+    .matches(/^258[8][2-467]\d{7}$/).withMessage('Formato inválido. Ex: +258 84 123 4567'),
   
   body('description')
     .optional()
@@ -28,6 +32,16 @@ exports.createStore = [
   
   body('theme_config')
     .optional()
+    .customSanitizer((value) => {
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          return value;
+        }
+      }
+      return value;
+    })
     .isObject().withMessage('Configuração de tema deve ser um objecto JSON'),
   
   // Validação assíncrona de slug único (após validações síncronas)

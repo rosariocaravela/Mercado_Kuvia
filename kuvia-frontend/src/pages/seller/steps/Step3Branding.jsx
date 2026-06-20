@@ -29,7 +29,11 @@ export default function Step3Branding({ onComplete, onBack }) {
       setTimeout(() => onComplete(response.data.store), 2000);
     } catch (error) {
       console.error('Erro ao publicar:', error);
-      alert('Não foi possível publicar. Tente novamente.');
+      const backendMessage = error.response?.data?.message ||
+        (error.response?.data?.errors ? error.response.data.errors.map(e => e.message).join(', ') : null) ||
+        error.message ||
+        'Não foi possível publicar. Tente novamente.';
+      alert(backendMessage);
     } finally {
       setIsSubmitting(false);
     }

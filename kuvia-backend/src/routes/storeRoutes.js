@@ -12,8 +12,9 @@ const upload = require('../config/upload');
 
 // IMPORTANTE: rotas específicas SEMPRE antes das dinâmicas
 
-// Verificar slug (TEM QUE VIR PRIMEIRO)
+// Verificar slug usando caminho fixo antes das rotas dinâmicas
 router.get('/check-slug', validateSlugAvailability, storeController.checkSlug);
+router.get('/slug/check', validateSlugAvailability, storeController.checkSlug);
 
 // Pesquisa de lojas
 router.get('/', searchStores, storeController.searchStores);
@@ -31,11 +32,11 @@ router.post(
   '/',
   authenticate,
   authorize('SELLER'),
-  createStore,
   upload.fields([
     { name: 'logo', maxCount: 1 },
     { name: 'banner', maxCount: 1 }
   ]),
+  createStore,
   storeController.createStore
 );
 
@@ -44,11 +45,11 @@ router.put(
   authenticate,
   authorize('SELLER'),
   checkStoreOwnership,
-  updateStore,
   upload.fields([
     { name: 'logo', maxCount: 1 },
     { name: 'banner', maxCount: 1 }
   ]),
+  updateStore,
   storeController.updateStore
 );
 
