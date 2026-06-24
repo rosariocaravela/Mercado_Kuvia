@@ -7,26 +7,9 @@ const initDatabase = require('./database/init');
 const app = express();
 
 
-// Middlewares
-
-// Lista de domínios permitidos
-const allowedOrigins = [
-  process.env.FRONTEND_URL, // O link do Render em produção
-  'http://localhost:5173',  // O link do Vite local
-
-].filter(Boolean); // Remove valores indefinidos
-
+// Middlewaresdados
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permite solicitações sem origem (ex: Postman ou solicitações de servidor para servidor)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Bloqueio de CORS: Origem não permitida'));
-    }
-  },
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
 
