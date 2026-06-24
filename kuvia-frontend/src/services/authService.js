@@ -19,21 +19,21 @@ async function request(endpoint, options = {}) {
 }
 
 export async function registerClient(payload) {
-  return request('/api/auth/register/client', {
+  return request('/auth/register/client', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 }
 
 export async function registerSeller(payload) {
-  return request('/api/auth/register/seller', {
+  return request('/auth/register/seller', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 }
 
 export async function loginUser(identifier, password) {
-  return request('/api/auth/login', {
+  return request('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ identifier, password }),
   });
