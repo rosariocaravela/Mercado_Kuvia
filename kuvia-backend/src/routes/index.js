@@ -6,8 +6,6 @@ const authRoutes = require('./authRoutes');
 const userRoutes = require('./userRoutes');
 const storeRoutes = require('./storeRoutes');
 const productRoutes = require('./productRoutes');
-
-// ✨ NOVO: Importar rotas do dashboard
 const dashboardRoutes = require('./dashboardRoutes');
 
 // Registar rotas
