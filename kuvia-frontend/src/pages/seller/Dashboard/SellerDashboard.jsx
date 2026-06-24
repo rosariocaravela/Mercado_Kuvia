@@ -138,7 +138,7 @@ export default function SellerDashboard() {
       {/* Gráfico + Atividades */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter-desktop">
         <div className="lg:col-span-2">
-          <SalesChart salesData={salesData} />
+          <SalesChart salesData={salesData} hasStore={Boolean(store)} />
         </div>
         <div>
           <ActivityFeed activities={activities} />

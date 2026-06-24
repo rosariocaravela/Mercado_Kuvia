@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { dashboardService } from '../../../../services/dashboardService';
 
-export default function SalesChart({ salesData: initialSalesData }) {
+export default function SalesChart({ salesData: initialSalesData, hasStore = true }) {
   const [period, setPeriod] = useState('7days');
-  const [salesData, setSalesData] = useState(initialSalesData);
+  const [salesData, setSalesData] = useState(initialSalesData || { labels: [], values: [], period: '7days' });
   const [loading, setLoading] = useState(false);
 
   // Carregar dados quando o período mudar
   useEffect(() => {
+    if (!hasStore) {
+      setSalesData(initialSalesData || { labels: [], values: [], period: '7days' });
+      return;
+    }
+
     const fetchSalesData = async () => {
       setLoading(true);
       try {
@@ -24,7 +29,7 @@ export default function SalesChart({ salesData: initialSalesData }) {
     };
 
     fetchSalesData();
-  }, [period]);
+  }, [period, hasStore, initialSalesData]);
 
   const data = salesData || { labels: [], values: [] };
   const maxValue = Math.max(...data.values, 1);

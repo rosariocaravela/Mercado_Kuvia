@@ -79,13 +79,17 @@ exports.getSalesTrend = async (req, res) => {
     const Store = require('../models/Store');
     
     const seller = await Seller.findOne({ where: { userId } });
-    if (!seller) {
-      return res.status(404).json({ success: false, message: 'Vendedor não encontrado' });
-    }
-    
-    const store = await Store.findOne({ where: { sellerId: seller.id } });
-    if (!store) {
-      return res.status(404).json({ success: false, message: 'Loja não encontrada' });
+    const store = seller ? await Store.findOne({ where: { sellerId: seller.id } }) : null;
+
+    if (!seller || !store) {
+      return res.json({
+        success: true,
+        data: {
+          labels: [],
+          values: [],
+          period: `${days}days`
+        }
+      });
     }
     
     const salesData = await dashboardService.getSalesTrend(store.id, parseInt(days));
