@@ -42,7 +42,7 @@ const Store = sequelize.define('Store', {
     type: DataTypes.STRING(20),
     allowNull: false,
     validate: {
-      is: /^(\+258)?[8][2-7]\d{7}$/,
+      is: /^(\+?258)?8[2-7]\d{7}$/,
       notEmpty: true
     }
   },
@@ -50,17 +50,11 @@ const Store = sequelize.define('Store', {
   logo_url: {
     type: DataTypes.STRING(500),
     allowNull: true,
-    validate: {
-      isUrl: true
-    }
   },
 
   banner_url: {
     type: DataTypes.STRING(500),
     allowNull: true,
-    validate: {
-      isUrl: true
-    }
   },
 
   sellerId: {

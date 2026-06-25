@@ -9,20 +9,51 @@ const User = require('../models/User');
  * Criar nova loja (apenas para vendedores verificados)
  */
 exports.createStore = async (sellerId, storeData, files = {}) => {
+  console.log('\n🔧 [storeService] Iniciando createStore...');
+
   // Verificar se vendedor já tem loja
   const existingStore = await Store.findOne({ where: { sellerId: sellerId } });
   if (existingStore) {
     throw new Error('Este vendedor já possui uma loja. Cada vendedor pode ter apenas uma loja.');
   }
 
-  // Preparar dados para criação
+  // ✅ Normalizar WhatsApp (garantir que começa com +)
+  let whatsapp = storeData.whatsapp_number || '';
+  const whatsappClean = whatsapp.replace(/\D/g, '');
+
+  if (whatsappClean.startsWith('258')) {
+    whatsapp = `+${whatsappClean}`;
+  } else if (whatsappClean.startsWith('8')) {
+    whatsapp = `+258${whatsappClean}`;
+  } else {
+    whatsapp = `+${whatsappClean}`;
+  }
+
+  console.log('📱 WhatsApp normalizado:', whatsapp);
+
+  // Preparar dados base
   const data = {
-    ...storeData,
+    name: storeData.name,
+    slug: storeData.slug?.toLowerCase(),
+    whatsapp_number: whatsapp,
+    description: storeData.description || '',
     sellerId: sellerId,
-    is_active: false, // Requer aprovação admin
+    is_active: false,
     status: 'PENDING'
   };
 
+  console.log('🔧 Dados base preparados:', data);
+  // Processar theme_config
+  if (storeData.theme_config) {
+    try {
+      data.theme_config = typeof storeData.theme_config === 'string'
+        ? JSON.parse(storeData.theme_config)
+        : storeData.theme_config;
+      console.log('🔧 Theme config parseado:', data.theme_config);
+    } catch (e) {
+      console.error('❌ Erro ao parsear theme_config:', e);
+    }
+  }
   // Processar uploads se existirem
   if (files.logo?.[0]) {
     data.logo_url = `/uploads/stores/${files.logo[0].filename}`;
@@ -33,7 +64,7 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
 
   // Criar loja
   const store = await Store.create(data);
-  
+console.log('✅ Loja criada com ID:', store.id);
   // Retornar dados públicos (sem campos sensíveis)
   return store.toJSON();
 };
@@ -43,21 +74,21 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
  */
 exports.getStorePublicData = async (slug) => {
   const store = await Store.findOne({
-    where: { 
+    where: {
       slug: slug.toLowerCase(),
-      is_active: true, 
-      status: 'APPROVED' 
+      is_active: true,
+      status: 'APPROVED'
     },
     include: [
-      { 
-        model: Seller, 
-        as: 'owner', 
+      {
+        model: Seller,
+        as: 'owner',
         attributes: ['id', 'businessName', 'rating', 'verified'],
         include: [{ model: User, as: 'user', attributes: ['fullName'] }]
       }
     ],
-    attributes: { 
-      exclude: ['sellerId', 'is_active', 'status', 'createdAt', 'updatedAt'] 
+    attributes: {
+      exclude: ['sellerId', 'is_active', 'status', 'createdAt', 'updatedAt']
     }
   });
 
@@ -68,20 +99,20 @@ exports.getStorePublicData = async (slug) => {
 /**
  * Listar produtos de uma loja com filtros e paginação
  */
-exports.getStoreProducts = async (storeId, { 
-  page = 1, 
-  limit = 20, 
-  categoryId, 
-  minPrice, 
-  maxPrice, 
+exports.getStoreProducts = async (storeId, {
+  page = 1,
+  limit = 20,
+  categoryId,
+  minPrice,
+  maxPrice,
   search,
-  condition 
+  condition
 } = {}) => {
-  const where = { 
-    storeId, 
+  const where = {
+    storeId,
     is_active: true // Apenas produtos activos
   };
-  
+
   // Filtro de pesquisa por texto
   if (search) {
     where[Op.or] = [
@@ -89,7 +120,7 @@ exports.getStoreProducts = async (storeId, {
       { description: { [Op.iLike]: `%${search}%` } }
     ];
   }
-  
+
   // Filtros adicionais
   if (categoryId) where.categoryId = categoryId;
   if (condition) where.condition = condition;
@@ -104,17 +135,17 @@ exports.getStoreProducts = async (storeId, {
   const { count, rows } = await Product.findAndCountAll({
     where,
     include: [
-      { 
-        model: Category, 
-        as: 'category', 
-        attributes: ['id', 'name', 'slug', 'icon'] 
+      {
+        model: Category,
+        as: 'category',
+        attributes: ['id', 'name', 'slug', 'icon']
       }
     ],
     limit: parseInt(limit),
     offset,
     order: [['createdAt', 'DESC']],
     attributes: [
-      'id', 'title', 'slug', 'price', 'currency', 'condition', 
+      'id', 'title', 'slug', 'price', 'currency', 'condition',
       'stock', 'images', 'storeId', 'createdAt', 'views'
     ]
   });
@@ -131,18 +162,18 @@ exports.getStoreProducts = async (storeId, {
 /**
  * Pesquisa global de lojas (para página /explore)
  */
-exports.searchStores = async ({ 
-  search = '', 
-  page = 1, 
+exports.searchStores = async ({
+  search = '',
+  page = 1,
   limit = 12,
   province,
-  category 
+  category
 } = {}) => {
-  const where = { 
-    is_active: true, 
-    status: 'APPROVED' 
+  const where = {
+    is_active: true,
+    status: 'APPROVED'
   };
-  
+
   // Filtro de pesquisa
   if (search) {
     where[Op.or] = [
@@ -150,7 +181,7 @@ exports.searchStores = async ({
       { description: { [Op.iLike]: `%${search}%` } }
     ];
   }
-  
+
   // Filtro por província (via seller)
   if (province) {
     // Nota: requer join com Seller para filtrar por localização
@@ -162,9 +193,9 @@ exports.searchStores = async ({
   const { count, rows } = await Store.findAndCountAll({
     where,
     include: [
-      { 
-        model: Seller, 
-        as: 'owner', 
+      {
+        model: Seller,
+        as: 'owner',
         attributes: ['id', 'businessName', 'rating', 'verified'],
         include: [{ model: User, as: 'user', attributes: ['fullName'] }]
       }
@@ -231,8 +262,8 @@ exports.getSellerStore = async (sellerId) => {
   return Store.findOne({
     where: { sellerId },
     include: [
-      { 
-        model: Seller, 
+      {
+        model: Seller,
         as: 'owner',
         include: [{ model: User, as: 'user', attributes: ['fullName', 'email'] }]
       }

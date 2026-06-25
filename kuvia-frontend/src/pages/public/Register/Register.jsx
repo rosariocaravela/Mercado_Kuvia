@@ -8,7 +8,7 @@ export default function Register() {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
-  const [step, setStep] = useState(1); // 1: tipo, 2: dados, 3: loja (se seller)
+  const [step, setStep] = useState(1); // 1: tipo, 2: dados
   const [accountType, setAccountType] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -20,10 +20,6 @@ export default function Register() {
     phone: '',
     password: '',
     confirmPassword: '',
-    // Campos específicos para vendedor
-    storeName: '',
-    storeCategory: '',
-    storeDescription: ''
   });
 
   const handleChange = (e) => {
@@ -66,26 +62,10 @@ export default function Register() {
     return true;
   };
 
-  const validateStep3 = () => {
-    if (accountType === 'seller') {
-      if (!formData.storeName || !formData.storeCategory) {
-        setError('Por favor, preencha os dados da loja.');
-        return false;
-      }
-    }
-    return true;
-  };
-
   const handleNext = () => {
     if (step === 1 && validateStep1()) {
       setStep(2);
     } else if (step === 2 && validateStep2()) {
-      if (accountType === 'seller') {
-        setStep(3);
-      } else {
-        handleSubmit();
-      }
-    } else if (step === 3 && validateStep3()) {
       handleSubmit();
     }
   };
@@ -107,11 +87,6 @@ export default function Register() {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        ...(accountType === 'seller' ? {
-          businessName: formData.storeName,
-          businessType: formData.storeCategory,
-          businessDescription: formData.storeDescription,
-        } : {}),
       };
 
       const response = accountType === 'seller'
@@ -124,9 +99,12 @@ export default function Register() {
 
       login(response.data.token, response.data.user);
 
+      // Redirecionamento baseado no tipo de conta
       if (accountType === 'seller') {
-        navigate('/seller/dashboard');
+        // Vendedor → vai para o wizard de criação de loja
+        navigate('/seller/criar-loja');
       } else {
+        // Cliente → vai para o dashboard
         navigate('/dashboard');
       }
     } catch (err) {
@@ -135,17 +113,6 @@ export default function Register() {
       setLoading(false);
     }
   };
-
-  const categories = [
-    { label: 'Eletrónicos', value: 'ELETRONICOS' },
-    { label: 'Moda e Vestuário', value: 'MODA' },
-    { label: 'Beleza e Cosméticos', value: 'BELEZA' },
-    { label: 'Alimentação', value: 'ALIMENTACAO' },
-    { label: 'Agricultura', value: 'AGRICULTURA' },
-    { label: 'Móveis e Decoração', value: 'MOVEIS' },
-    { label: 'Serviços', value: 'SERVICOS' },
-    { label: 'Outros', value: 'OUTROS' }
-  ];
 
   return (
     <main className="min-h-screen flex flex-col md:flex-row overflow-hidden">
@@ -205,16 +172,16 @@ export default function Register() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
               <span className="font-label-sm text-label-sm text-outline">
-                Passo {step} de {accountType === 'seller' ? 3 : 2}
+                Passo {step} de 2
               </span>
               <span className="font-label-sm text-label-sm text-primary">
-                {Math.round((step / (accountType === 'seller' ? 3 : 2)) * 100)}%
+                {Math.round((step / 2) * 100)}%
               </span>
             </div>
             <div className="h-2 bg-surface-container-low rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary transition-all duration-500"
-                style={{ width: `${(step / (accountType === 'seller' ? 3 : 2)) * 100}%` }}
+                style={{ width: `${(step / 2) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -223,12 +190,10 @@ export default function Register() {
             <h3 className="font-headline-md text-headline-md text-on-surface mb-2">
               {step === 1 && 'Que tipo de conta pretende?'}
               {step === 2 && 'Os seus dados'}
-              {step === 3 && 'Sobre a sua loja'}
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant">
               {step === 1 && 'Escolha como vai usar a Kuvia.'}
               {step === 2 && 'Preencha as suas informações pessoais.'}
-              {step === 3 && 'Conte-nos mais sobre o seu negócio.'}
             </p>
           </div>
 
@@ -414,77 +379,6 @@ export default function Register() {
             </form>
           )}
 
-          {/* Step 3: Store Data (only for sellers) */}
-          {step === 3 && accountType === 'seller' && (
-            <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
-              <div className="space-y-2">
-                <label className="font-label-md text-label-md text-on-surface" htmlFor="storeName">
-                  Nome da Loja *
-                </label>
-                <div className="relative group">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">
-                    storefront
-                  </span>
-                  <input
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md"
-                    id="storeName"
-                    name="storeName"
-                    placeholder="Ex: Loja do António"
-                    type="text"
-                    value={formData.storeName}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="font-label-md text-label-md text-on-surface" htmlFor="storeCategory">
-                  Categoria *
-                </label>
-                <div className="relative group">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors z-10">
-                    category
-                  </span>
-                  <select
-                    id="storeCategory"
-                    name="storeCategory"
-                    value={formData.storeCategory}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md appearance-none"
-                  >
-                    <option value="">Selecione uma categoria</option>
-
-                    {categories.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline pointer-events-none">
-                    expand_more
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="font-label-md text-label-md text-on-surface" htmlFor="storeDescription">
-                  Descrição da Loja
-                </label>
-                <textarea
-                  className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface-container-lowest focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-body-md resize-none"
-                  id="storeDescription"
-                  name="storeDescription"
-                  placeholder="Descreva brevemente o seu negócio..."
-                  rows="4"
-                  value={formData.storeDescription}
-                  onChange={handleChange}
-                ></textarea>
-              </div>
-            </form>
-          )}
-
           {/* Navigation Buttons */}
           <div className="flex gap-3 mt-8">
             {step > 1 && (
@@ -507,9 +401,7 @@ export default function Register() {
                   <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                   A processar...
                 </span>
-              ) : step === 1 ? 'Continuar' :
-                step === 2 && accountType === 'seller' ? 'Continuar' :
-                  'Criar Conta'}
+              ) : step === 1 ? 'Continuar' : 'Criar Conta'}
             </button>
           </div>
 

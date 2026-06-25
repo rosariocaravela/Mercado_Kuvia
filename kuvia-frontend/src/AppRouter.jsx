@@ -24,8 +24,6 @@ import SellerAnalytics from './pages/seller/Analytics/Analytics';
 import SellerStoreSettings from './pages/seller/StoreSettings/StoreSettings';
 import SellerProfile from './pages/seller/Profile/SellerProfile';
 import CreateStoreWizard from './pages/seller/CreateStoreWizard';
-
-// ✨ NOVO: Layout do Vendedor (sidebar + topbar + bottom nav)
 import SellerLayout from './components/layout/SellerLayout';
 
 // Páginas do Admin

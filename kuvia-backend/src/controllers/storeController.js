@@ -8,8 +8,17 @@ const Seller = require('../models/Seller');
 // =====================================================
 exports.createStore = async (req, res) => {
   try {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📥 RECEBENDO PEDIDO DE CRIAÇÃO DE LOJA');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('👤 Utilizador:', req.user?.id, req.user?.role);
+    console.log('📦 Body recebido:', req.body);
+    console.log('🖼️  Ficheiros recebidos:', req.files);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+       console.log('❌ Erros de validação:', errors.array());
       return res.status(400).json({
         success: false,
         errors: errors.array().map(e => ({
@@ -51,10 +60,17 @@ exports.createStore = async (req, res) => {
 
   } catch (error) {
     console.error('❌ createStore error:', error);
+     console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('❌ ERRO AO CRIAR LOJA');
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('Mensagem:', error.message);
+    console.error('Stack:', error.stack);
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     return res.status(500).json({
       success: false,
-      message: 'Erro ao criar loja.'
+      message: error.message || 'Erro ao criar loja.',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };

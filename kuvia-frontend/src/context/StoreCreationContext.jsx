@@ -64,6 +64,18 @@ export const StoreCreationProvider = ({ children }) => {
       if (!storeData.name?.trim()) newErrors.name = 'Nome obrigatório';
       if (storeData.name?.trim().length < 3) newErrors.name = 'Mínimo 3 caracteres';
       if (!slugAvailable) newErrors.slug = 'Este URL já está em uso';
+
+      // ✅ NOVO: Validar WhatsApp
+      if (!storeData.whatsapp?.trim()) {
+        newErrors.whatsapp = 'O número WhatsApp é obrigatório';
+      } else {
+        // Formato Moçambique: +258 8X XXX XXXX
+        const phoneClean = storeData.whatsapp.replace(/\D/g, '');
+        const phoneRegex = /^(\+?258)?8[2-7]\d{7}$/;
+        if (!phoneRegex.test(phoneClean)) {
+          newErrors.whatsapp = 'Formato inválido. Ex: +258 84 123 4567';
+        }
+      }
     }
     if (step === 2 && storeData.categories.length === 0) {
       newErrors.categories = 'Seleccione pelo menos uma categoria';

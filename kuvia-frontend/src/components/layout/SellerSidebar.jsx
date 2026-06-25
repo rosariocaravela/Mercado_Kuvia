@@ -81,7 +81,7 @@ export default function SellerSidebar({ storeName = 'Minha Loja', plan = 'Plano 
           className="w-full flex items-center gap-3 px-4 py-2 text-error hover:bg-error-container rounded-lg transition-all"
         >
           <span className="material-symbols-outlined">logout</span>
-          <span className="font-label-md text-label-md">Sair</span>
+          <span className="font-label-md text-label-md">Terminar sessão</span>
         </button>
       </div>
     </aside>
