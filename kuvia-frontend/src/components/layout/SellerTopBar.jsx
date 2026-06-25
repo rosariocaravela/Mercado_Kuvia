@@ -2,8 +2,49 @@ import { useAuth } from '../../hooks/useAuth';
 
 export default function SellerTopBar({ title = 'Minha Loja Digital' }) {
   const { user } = useAuth();
-  const userName = user?.fullName || 'Utilizador';
-  const userInitial = userName.charAt(0).toUpperCase();
+
+  // ✅ Capitaliza primeira letra
+  const capitalize = (text) => {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  };
+
+  // ✅ Primeiro nome com primeira letra maiúscula
+  const getFirstName = () => {
+    if (!user) return 'Utilizador';
+
+    const fullName =
+      user.fullName ||
+      user.name ||
+      user.businessName ||
+      user.email ||
+      'Utilizador';
+
+    return capitalize(fullName.split(' ')[0]);
+  };
+
+  // ✅ Iniciais do avatar
+  const getInitials = () => {
+    if (!user) return 'U';
+
+    const name =
+      user.fullName ||
+      user.name ||
+      user.businessName ||
+      user.email ||
+      'U';
+
+    const parts = name.split(' ');
+
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+
+    return name.charAt(0).toUpperCase();
+  };
+
+  const userName = getFirstName();
+  const userInitials = getInitials();
 
   return (
     <header className="flex justify-between items-center w-full px-margin-page h-16 bg-background-surface border-b border-border-light sticky top-0 z-40">
@@ -24,10 +65,10 @@ export default function SellerTopBar({ title = 'Minha Loja Digital' }) {
 
         <div className="h-8 w-px bg-border-light mx-1"></div>
 
-        {/* Perfil */}
+        {/* Perfil - ✅ CORRIGIDO: usar userInitials */}
         <button className="flex items-center gap-2 p-1 pl-1 pr-3 hover:bg-surface-container rounded-full transition-colors">
           <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold border border-border-light">
-            {userInitial}
+            {userInitials}
           </div>
           <span className="font-label-md text-label-md hidden md:inline">{userName}</span>
         </button>

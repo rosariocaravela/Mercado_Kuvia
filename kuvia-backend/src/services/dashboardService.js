@@ -61,7 +61,7 @@ exports.getDashboardData = async (userId) => {
     where: { storeId: store.id },
     limit: 5,
     order: [['createdAt', 'DESC']],
-    attributes: ['id', 'title', 'price', 'stock', 'views', 'createdAt']
+    attributes: ['id', 'name', 'price', 'stock', 'views', 'createdAt']
   });
 
   return {
@@ -90,7 +90,7 @@ exports.getDashboardData = async (userId) => {
 
 exports.getStoreStats = async (storeId) => {
   const totalProducts = await Product.count({
-    where: { storeId, is_active: true }
+    where: { storeId, isActive: true }
   });
 
   const totalViews = await Product.sum('views', {
@@ -112,7 +112,7 @@ exports.getStoreStats = async (storeId) => {
     where: {
       storeId,
       stock: { [Op.lte]: 5 },
-      is_active: true
+      isActive: true
     }
   });
 
