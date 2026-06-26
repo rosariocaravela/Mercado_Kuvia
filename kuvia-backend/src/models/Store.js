@@ -85,7 +85,6 @@ const Store = sequelize.define('Store', {
   }
 }, {
   tableName: 'stores',
-
   // 🔥 IMPORTANTE: tua tabela NÃO tem timestamps
   timestamps: false
 });

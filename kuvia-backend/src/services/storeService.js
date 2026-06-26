@@ -9,63 +9,49 @@ const User = require('../models/User');
  * Criar nova loja (apenas para vendedores verificados)
  */
 exports.createStore = async (sellerId, storeData, files = {}) => {
-  console.log('\n🔧 [storeService] Iniciando createStore...');
+  const existingStore = await Store.findOne({
+    where: { sellerId }
+  });
 
-  // Verificar se vendedor já tem loja
-  const existingStore = await Store.findOne({ where: { sellerId: sellerId } });
   if (existingStore) {
-    throw new Error('Este vendedor já possui uma loja. Cada vendedor pode ter apenas uma loja.');
+    throw new Error('Este vendedor já possui uma loja.');
   }
 
-  // ✅ Normalizar WhatsApp (garantir que começa com +)
   let whatsapp = storeData.whatsapp_number || '';
   const whatsappClean = whatsapp.replace(/\D/g, '');
 
   if (whatsappClean.startsWith('258')) {
     whatsapp = `+${whatsappClean}`;
-  } else if (whatsappClean.startsWith('8')) {
-    whatsapp = `+258${whatsappClean}`;
   } else {
-    whatsapp = `+${whatsappClean}`;
+    whatsapp = `+258${whatsappClean}`;
   }
 
-  console.log('📱 WhatsApp normalizado:', whatsapp);
-
-  // Preparar dados base
   const data = {
     name: storeData.name,
     slug: storeData.slug?.toLowerCase(),
     whatsapp_number: whatsapp,
     description: storeData.description || '',
-    sellerId: sellerId,
+    sellerId,
     is_active: false,
     status: 'PENDING'
   };
 
-  console.log('🔧 Dados base preparados:', data);
-  // Processar theme_config
   if (storeData.theme_config) {
-    try {
-      data.theme_config = typeof storeData.theme_config === 'string'
+    data.theme_config =
+      typeof storeData.theme_config === 'string'
         ? JSON.parse(storeData.theme_config)
         : storeData.theme_config;
-      console.log('🔧 Theme config parseado:', data.theme_config);
-    } catch (e) {
-      console.error('❌ Erro ao parsear theme_config:', e);
-    }
   }
-  // Processar uploads se existirem
+
   if (files.logo?.[0]) {
     data.logo_url = `/uploads/stores/${files.logo[0].filename}`;
   }
+
   if (files.banner?.[0]) {
     data.banner_url = `/uploads/stores/${files.banner[0].filename}`;
   }
 
-  // Criar loja
   const store = await Store.create(data);
-console.log('✅ Loja criada com ID:', store.id);
-  // Retornar dados públicos (sem campos sensíveis)
   return store.toJSON();
 };
 
@@ -84,16 +70,21 @@ exports.getStorePublicData = async (slug) => {
         model: Seller,
         as: 'owner',
         attributes: ['id', 'businessName', 'rating', 'verified'],
-        include: [{ model: User, as: 'user', attributes: ['fullName'] }]
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['fullName']
+          }
+        ]
       }
     ],
     attributes: {
-      exclude: ['sellerId', 'is_active', 'status', 'createdAt', 'updatedAt']
+      exclude: ['sellerId', 'createdAt', 'updatedAt']
     }
   });
 
-  if (!store) return null;
-  return store.toJSON();
+  return store ? store.toJSON() : null;
 };
 
 /**
@@ -105,32 +96,30 @@ exports.getStoreProducts = async (storeId, {
   categoryId,
   minPrice,
   maxPrice,
-  search,
-  condition
+  search
 } = {}) => {
+
   const where = {
     storeId,
-    is_active: true // Apenas produtos activos
+    isActive: true
   };
 
-  // Filtro de pesquisa por texto
   if (search) {
     where[Op.or] = [
-      { title: { [Op.iLike]: `%${search}%` } },
+      { name: { [Op.iLike]: `%${search}%` } },
       { description: { [Op.iLike]: `%${search}%` } }
     ];
   }
 
-  // Filtros adicionais
   if (categoryId) where.categoryId = categoryId;
-  if (condition) where.condition = condition;
+
   if (minPrice || maxPrice) {
     where.price = {};
-    if (minPrice) where.price[Op.gte] = parseFloat(minPrice);
-    if (maxPrice) where.price[Op.lte] = parseFloat(maxPrice);
+    if (minPrice) where.price[Op.gte] = Number(minPrice);
+    if (maxPrice) where.price[Op.lte] = Number(maxPrice);
   }
 
-  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const offset = (page - 1) * limit;
 
   const { count, rows } = await Product.findAndCountAll({
     where,
@@ -141,20 +130,27 @@ exports.getStoreProducts = async (storeId, {
         attributes: ['id', 'name', 'slug', 'icon']
       }
     ],
-    limit: parseInt(limit),
+    limit,
     offset,
     order: [['createdAt', 'DESC']],
     attributes: [
-      'id', 'title', 'slug', 'price', 'currency', 'condition',
-      'stock', 'images', 'storeId', 'createdAt', 'views'
+      'id',
+      'name',
+      'slug',
+      'price',
+      'stock',
+      'images',
+      'storeId',
+      'createdAt',
+      'views'
     ]
   });
 
   return {
     count,
     products: rows.map(p => p.toJSON()),
-    page: parseInt(page),
-    limit: parseInt(limit),
+    page,
+    limit,
     totalPages: Math.ceil(count / limit)
   };
 };
@@ -163,12 +159,14 @@ exports.getStoreProducts = async (storeId, {
  * Pesquisa global de lojas (para página /explore)
  */
 exports.searchStores = async ({
-  search = '',
-  page = 1,
+  search = '', 
+  page = 1, 
   limit = 12,
+  categories,
   province,
-  category
+  minRating
 } = {}) => {
+  // ✅ CORREÇÃO: is_active (com underscore)
   const where = {
     is_active: true,
     status: 'APPROVED'
@@ -182,10 +180,16 @@ exports.searchStores = async ({
     ];
   }
 
-  // Filtro por província (via seller)
-  if (province) {
-    // Nota: requer join com Seller para filtrar por localização
-    // Implementação simplificada: filtrar no frontend ou adicionar campo na Store
+  // Filtro por categorias (se Store tem campo categories JSONB)
+  if (categories) {
+    const catArray = categories.split(',');
+    where.categories = { [Op.overlap]: catArray };
+  }
+
+  // Filtro por avaliação mínima (via seller)
+  if (minRating) {
+    // Nota: rating está no Seller, não na Store
+    // Requer join ou subquery
   }
 
   const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -195,15 +199,24 @@ exports.searchStores = async ({
     include: [
       {
         model: Seller,
-        as: 'owner',
-        attributes: ['id', 'businessName', 'rating', 'verified'],
-        include: [{ model: User, as: 'user', attributes: ['fullName'] }]
+        as: 'seller',
+        attributes: ['id', 'businessName', 'rating'],
+        include: [{ model: User, as: 'user', attributes: ['name'] }]
       }
     ],
     limit: parseInt(limit),
     offset,
-    order: [['createdAt', 'DESC']],
-    attributes: ['id', 'slug', 'name', 'description', 'logo_url', 'whatsapp_number']
+    order: [['id', 'DESC']],
+    // ✅ Adicionar mais campos úteis
+    attributes: [
+      'id', 
+      'slug', 
+      'name', 
+      'description', 
+      'logo_url', 
+      'banner_url',  // ← ADICIONAR
+      'whatsapp_number',
+    ]
   });
 
   return {

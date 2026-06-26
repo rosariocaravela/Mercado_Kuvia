@@ -9,6 +9,7 @@ import Register from './pages/public/Register/Register';
 import Explore from './pages/public/Explore/Explore';
 import Storefront from './pages/public/Storefront/Storefront';
 
+
 // Páginas do Cliente
 import CustomerDashboard from './pages/customer/Dashboard/CustomerDashboard';
 import CustomerOrders from './pages/customer/Orders/Orders';
@@ -18,13 +19,14 @@ import CustomerProfile from './pages/customer/Profile/CustomerProfile';
 
 // Páginas do Vendedor
 import SellerDashboard from './pages/seller/Dashboard/SellerDashboard';
-import SellerProducts from './pages/seller/Products/Products';
 import SellerOrders from './pages/seller/Orders/Orders';
 import SellerAnalytics from './pages/seller/Analytics/Analytics';
 import SellerStoreSettings from './pages/seller/StoreSettings/StoreSettings';
 import SellerProfile from './pages/seller/Profile/SellerProfile';
 import CreateStoreWizard from './pages/seller/CreateStoreWizard';
 import SellerLayout from './components/layout/SellerLayout';
+import Products from './pages/seller/Products/Products';
+import CreateProduct from './pages/seller/Products/CreateProduct';
 
 // Páginas do Admin
 import AdminDashboard from './pages/admin/Dashboard/AdminDashboard';
@@ -173,10 +175,13 @@ function AppRouter() {
       >
         {/* Rota padrão: /seller → redireciona para /seller/dashboard */}
         <Route index element={<Navigate to="/seller/dashboard" replace />} />
-        
+
         {/* Dashboard principal */}
         <Route path="dashboard" element={<SellerDashboard />} />
-        
+        <Route path="products" element={<Products />} />
+        <Route path="products/new" element={<CreateProduct />} />
+        <Route path="products/:id/edit" element={<CreateProduct />} />
+
         {/* Páginas em desenvolvimento (placeholders) */}
         <Route path="products" element={<ComingSoon title="Gestão de Produtos" />} />
         <Route path="products/new" element={<ComingSoon title="Criar Novo Produto" />} />
@@ -187,7 +192,7 @@ function AppRouter() {
         <Route path="marketing" element={<ComingSoon title="Marketing e Campanhas" />} />
         <Route path="settings" element={<ComingSoon title="Definições da Loja" />} />
         <Route path="more" element={<ComingSoon title="Mais Opções" />} />
-        
+
         {/* Redirecionar /seller/store para a loja pública do vendedor */}
         <Route path="store" element={<Navigate to="/store/minha-loja" replace />} />
       </Route>

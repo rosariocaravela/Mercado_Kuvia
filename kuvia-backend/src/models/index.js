@@ -11,6 +11,7 @@ const Order = require('./Order');
 const OrderItem = require('./OrderItem');
 const Review = require('./Review');
 const Message = require('./Message');
+const ProductImage = require('./ProductImage');
 
 // =======================
 // RELAÇÕES
@@ -74,6 +75,9 @@ User.hasMany(Message, { foreignKey: 'receiverId', as: 'receivedMessages' });
 Message.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
 Message.belongsTo(User, { foreignKey: 'receiverId', as: 'receiver' });
 
+ProductImage.belongsTo(Product, { foreignKey: 'productId', as: 'product', onDelete: 'CASCADE' });
+Product.hasMany(ProductImage, { foreignKey: 'productId', as: 'images', onDelete: 'CASCADE' });
+
 module.exports = {
   sequelize,
   User,
@@ -85,5 +89,6 @@ module.exports = {
   Order,
   OrderItem,
   Review,
+  ProductImage,
   Message
 };

@@ -3,17 +3,37 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
-// Garantir pasta de uploads para lojas
-const uploadDir = 'uploads/stores';
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// ✅ Criar pastas de upload se não existirem
+const uploadDirs = {
+  stores: 'uploads/stores',
+  products: 'uploads/products'
+};
 
-// Configuração do storage para imagens de lojas
+Object.values(uploadDirs).forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
+// ✅ Configuração do storage
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
+  destination: (req, file, cb) => {
+    // Determinar pasta baseada no campo do formulário
+    let uploadPath;
+    
+    if (file.fieldname === 'logo' || file.fieldname === 'banner') {
+      uploadPath = uploadDirs.stores;
+    } else if (file.fieldname === 'images' || file.fieldname === 'image') {
+      uploadPath = uploadDirs.products;
+    } else {
+      // Fallback para stores se não reconhecido
+      uploadPath = uploadDirs.stores;
+    }
+    
+    cb(null, uploadPath);
+  },
+  
   filename: (req, file, cb) => {
-    // Nome único: store-{uuid}-{timestamp}.{ext}
     const ext = path.extname(file.originalname).toLowerCase();
     const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
     
@@ -21,12 +41,17 @@ const storage = multer.diskStorage({
       return cb(new Error('Formato não suportado. Use JPG, PNG ou WebP.'), false);
     }
     
-    const uniqueName = `store-${uuidv4()}-${Date.now()}${ext}`;
+    // Prefixo baseado no tipo de upload
+    const prefix = (file.fieldname === 'logo' || file.fieldname === 'banner') 
+      ? 'store' 
+      : 'product';
+    
+    const uniqueName = `${prefix}-${uuidv4()}-${Date.now()}${ext}`;
     cb(null, uniqueName);
   }
 });
 
-// Filtro de arquivos
+// ✅ Filtro de arquivos
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   if (allowedTypes.includes(file.mimetype)) {
@@ -36,13 +61,13 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Configuração final do multer
+// ✅ Configuração final do multer
 const upload = multer({
   storage,
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB máximo por imagem
-    files: 2 // Máximo 2 uploads por requisição (logo + banner)
+    files: 10 // Aumentado para suportar múltiplos uploads
   }
 });
 

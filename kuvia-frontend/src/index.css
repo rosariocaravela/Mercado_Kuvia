@@ -62,3 +62,36 @@ details > summary::-webkit-details-marker {
 .animate-in {
   animation: fade-in 0.3s ease-out;
 }
+
+/* Glass header effect */
+.glass-header {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+/* Card shadow */
+.card-shadow {
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.05);
+}
+
+/* Transição suave */
+.transition-soft {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Esconder scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Line clamp para descrições */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
