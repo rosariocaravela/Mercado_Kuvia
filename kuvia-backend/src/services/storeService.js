@@ -26,6 +26,19 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
     whatsapp = `+258${whatsappClean}`;
   }
 
+  const categories = (() => {
+    if (Array.isArray(storeData.categories)) return storeData.categories;
+    if (typeof storeData.categories === 'string') {
+      try {
+        const parsed = JSON.parse(storeData.categories);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } catch (error) {
+        return storeData.categories ? [storeData.categories] : [];
+      }
+    }
+    return [];
+  })();
+
   const data = {
     name: storeData.name,
     slug: storeData.slug?.toLowerCase(),
@@ -33,7 +46,8 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
     description: storeData.description || '',
     sellerId,
     is_active: false,
-    status: 'PENDING'
+    status: 'PENDING',
+    categories
   };
 
   if (storeData.theme_config) {
@@ -53,6 +67,27 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
 
   const store = await Store.create(data);
   return store.toJSON();
+};
+
+/**
+ * Obter loja do vendedor pelo sellerId
+ */
+exports.getStoreBySeller = async (sellerId) => {
+  const store = await Store.findOne({
+    where: { sellerId },
+    include: [
+      {
+        model: Seller,
+        as: 'seller',
+        attributes: ['id', 'businessName', 'rating', 'verified'],
+        include: [
+          { model: User, as: 'user', attributes: ['fullName'] }
+        ]
+      }
+    ]
+  });
+
+  return store ? store.toJSON() : null;
 };
 
 /**

@@ -11,7 +11,7 @@ const CATEGORIES = [
   { id: 'sports', label: 'Desporto & Lazer', icon: 'sports' },
   { id: 'books', label: 'Livros & Papelaria', icon: 'menu_book' },
 ];
-
+ 
 export default function Step2Categories({ onNext, onBack }) {
   const { storeData, toggleCategory, errors, validateStep } = useStoreCreation();
 

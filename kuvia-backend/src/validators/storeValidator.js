@@ -43,6 +43,26 @@ exports.createStore = [
       return value;
     })
     .isObject().withMessage('Configuração de tema deve ser um objecto JSON'),
+
+  body('categories')
+    .optional()
+    .customSanitizer((value) => {
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          return value;
+        }
+      }
+      return value;
+    })
+    .custom((value) => {
+      if (value === undefined || value === null) return true;
+      if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
+        return true;
+      }
+      throw new Error('Categorias deve ser um array de strings');
+    }),
   
   // Validação assíncrona de slug único (após validações síncronas)
   body('slug').custom(async (slug) => {

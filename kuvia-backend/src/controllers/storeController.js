@@ -57,7 +57,6 @@ exports.createStore = async (req, res) => {
       message: 'Loja criada com sucesso!',
       data: store
     });
-
   } catch (error) {
     console.error('❌ createStore error:', error);
      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -71,6 +70,47 @@ exports.createStore = async (req, res) => {
       success: false,
       message: error.message || 'Erro ao criar loja.',
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
+// =====================================================
+// 🧾 LOJA DO VENDEDOR ATUAL
+// =====================================================
+exports.getMyStore = async (req, res) => {
+  try {
+    if (req.user?.role !== 'SELLER') {
+      return res.status(403).json({
+        success: false,
+        message: 'Apenas vendedores podem aceder à loja.'
+      });
+    }
+
+    const seller = await Seller.findOne({ where: { userId: req.user.id } });
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: 'Perfil de vendedor não encontrado.'
+      });
+    }
+
+    const store = await storeService.getStoreBySeller(seller.id);
+    if (!store) {
+      return res.status(404).json({
+        success: false,
+        message: 'Loja não encontrada para este vendedor.'
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: store
+    });
+  } catch (error) {
+    console.error('❌ getMyStore error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao carregar loja do vendedor.'
     });
   }
 };

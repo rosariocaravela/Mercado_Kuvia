@@ -62,6 +62,12 @@ const Store = sequelize.define('Store', {
     allowNull: true,
     comment: 'Chave estrangeira para o vendedor proprietário da loja'
   },
+  
+  categories: {
+  type: DataTypes.ARRAY(DataTypes.STRING),
+  allowNull: false,
+  defaultValue: []
+},
 
   theme_config: {
     type: DataTypes.JSONB,

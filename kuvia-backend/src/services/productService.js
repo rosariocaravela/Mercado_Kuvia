@@ -3,6 +3,7 @@ const Product = require('../models/Product');
 const ProductImage = require('../models/ProductImage');
 const Store = require('../models/Store');
 const Seller = require('../models/Seller');
+const Category = require('../models/Category');
 const fs = require('fs');
 const path = require('path');
 const { title } = require('process');
@@ -23,7 +24,7 @@ exports.getSellerProducts = async (userId, filters = {}) => {
 
   if (filters.search) {
     where[Op.or] = [
-      { title: { [Op.iLike]: `%${filters.search}%` } },
+      { name: { [Op.iLike]: `%${filters.search}%` } },
       { description: { [Op.iLike]: `%${filters.search}%` } }
     ];
   }
@@ -71,6 +72,32 @@ exports.getSellerProducts = async (userId, filters = {}) => {
   };
 };
 
+
+async function resolveCategoryId(categoryId) {
+  if (!categoryId) return null;
+  
+
+  // Accept UUID directly
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(categoryId)) return categoryId;
+
+  // Accept slug or name and resolve to actual category UUID
+  const category = await Category.findOne({
+    where: {
+      [Op.or]: [
+        { slug: categoryId },
+        { name: categoryId }
+      ]
+    }
+  });
+
+  if (!category) {
+    throw new Error('Categoria inválida. Use uma categoria existente.');
+  }
+
+  return category.id;
+}
+
 /**
  * Criar novo produto
  */
@@ -82,7 +109,7 @@ exports.createProduct = async (userId, productData, files = []) => {
   if (!store) throw new Error('Loja não encontrada');
 
   // ✅ NORMALIZAÇÃO DE DADOS
-  const name = productData.name || productData.title;
+  const name = productData.name;
 
   if (!name) {
     throw new Error('Nome do produto é obrigatório');
@@ -93,13 +120,15 @@ exports.createProduct = async (userId, productData, files = []) => {
     throw new Error('Preço inválido');
   }
 
+  const categoryId = await resolveCategoryId(productData.categoryId);
+
   const product = await Product.create({
     name,
     slug: generateSlug(name),
     description: productData.description || '',
     price,
     stock: parseInt(productData.stock || 0),
-    categoryId: productData.categoryId || null,
+    categoryId,
     storeId: store.id,
     isActive: productData.isActive !== false
   });
@@ -128,7 +157,9 @@ exports.updateProduct = async (userId, productId, productData, files = []) => {
   const product = await exports.getProductById(userId, productId);
   if (!product) throw new Error('Produto não encontrado');
 
-  const name = productData.name || productData.title;
+  const name = productData.name;
+
+  const resolvedCategoryId = await resolveCategoryId(productData.categoryId ?? product.categoryId);
 
   const updateData = {
     name: name || product.name,
@@ -136,7 +167,7 @@ exports.updateProduct = async (userId, productId, productData, files = []) => {
     description: productData.description ?? product.description,
     price: productData.price ? parseFloat(productData.price) : product.price,
     stock: productData.stock ? parseInt(productData.stock) : product.stock,
-    categoryId: productData.categoryId ?? product.categoryId,
+    categoryId: resolvedCategoryId,
     isActive: productData.isActive ?? product.isActive
   };
 
@@ -197,11 +228,11 @@ exports.toggleProductStatus = async (userId, productId, isActive) => {
 };
 
 /**
- * Helper: Gerar slug a partir do título
+ * Helper: Gerar slug a partir do nome
  */
-function generateSlug(title) {
-  if (!title) return '';
-  return title
+function generateSlug(name) {
+  if (!name) return '';
+  return name
     .toLowerCase()
     .trim()
     .normalize('NFD')

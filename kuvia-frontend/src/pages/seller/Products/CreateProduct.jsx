@@ -1,22 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productService } from '../../../services/productService';
+import { categoryService } from '../../../services/categoryService';
+import { storeService } from '../../../services/storeService';
 import { formatCurrency } from '../../../utils/formatters';
-
-const CATEGORIES = [
-  { id: 'electronics', label: 'Electrónica' },
-  { id: 'fashion', label: 'Moda & Vestuário' },
-  { id: 'home', label: 'Casa & Decoração' },
-  { id: 'beauty', label: 'Saúde & Beleza' },
-  { label: 'Alimentação' },
-  { id: 'services', label: 'Serviços' },
-  { id: 'kids', label: 'Kids & Brinquedos' },
-];
 
 const CONDITIONS = [
   { value: 'NOVO', label: 'Novo' },
   { value: 'USADO_BOM', label: 'Usado (Bom estado)' },
-  { value: 'USADO_REGULAR', label: 'Usado (Estado regular)' },
+  { value: 'USADO_REGULAR', label: 'Usado (Estado regular)' }
 ];
 
 export default function CreateProduct() {
@@ -27,7 +19,8 @@ export default function CreateProduct() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [product, setProduct] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [storeCategoriesText, setStoreCategoriesText] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -43,11 +36,39 @@ export default function CreateProduct() {
 
   const [imagePreviews, setImagePreviews] = useState([]);
 
+  // Carregar categorias
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  // Carregar produto se estiver a editar
   useEffect(() => {
     if (isEditing) {
       fetchProduct();
     }
   }, [id]);
+
+  const loadCategories = async () => {
+    try {
+      const data = await categoryService.getCategories();
+      let categoriesList = data;
+
+      try {
+        const storeResponse = await storeService.getMyStore();
+        if (storeResponse?.success && Array.isArray(storeResponse.data.categories) && storeResponse.data.categories.length) {
+          const storeCategories = storeResponse.data.categories;
+          categoriesList = data.filter(cat => storeCategories.includes(cat.id));
+          setStoreCategoriesText(`Categorias da loja: ${storeCategories.join(', ')}`);
+        }
+      } catch (storeErr) {
+        console.warn('Não foi possível carregar categorias da loja do vendedor:', storeErr);
+      }
+
+      setCategories(categoriesList);
+    } catch (err) {
+      console.error('Erro ao carregar categorias:', err);
+    }
+  };
 
   const fetchProduct = async () => {
     setLoading(true);
@@ -55,7 +76,6 @@ export default function CreateProduct() {
       const response = await productService.getProductById(id);
       if (response.success) {
         const p = response.data;
-        setProduct(p);
         setFormData({
           name: p.name || '',
           description: p.description || '',
@@ -120,7 +140,7 @@ export default function CreateProduct() {
       formDataObj.append('categoryId', formData.categoryId);
       formDataObj.append('isActive', formData.isActive);
 
-      formData.images.forEach((image, index) => {
+      formData.images.forEach((image) => {
         if (image instanceof File) {
           formDataObj.append('images', image);
         }
@@ -151,7 +171,6 @@ export default function CreateProduct() {
 
   return (
     <div className="px-margin-page py-8 max-w-4xl mx-auto">
-      {/* Cabeçalho */}
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => navigate('/seller/products')}
@@ -177,7 +196,6 @@ export default function CreateProduct() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Informações Básicas */}
         <div className="bg-background-surface border border-border-light rounded-xl p-6">
           <h2 className="font-headline-md text-ink-black mb-4">Informações Básicas</h2>
           
@@ -189,7 +207,7 @@ export default function CreateProduct() {
               <input
                 type="text"
                 name="name"
-                value={formData.title}
+                value={formData.name}
                 onChange={handleChange}
                 placeholder="Ex: Smartphone Samsung Galaxy S24"
                 className="w-full px-4 py-3 rounded-lg border border-border-light focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
@@ -228,7 +246,7 @@ export default function CreateProduct() {
                   required
                 />
                 {formData.price && (
-                  <p className="text-body-sm text-on-surface-variant mt-1">
+                  <p className="text-body-sm text-primary mt-1 font-semibold">
                     {formatCurrency(formData.price)}
                   </p>
                 )}
@@ -254,20 +272,26 @@ export default function CreateProduct() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="font-label-md text-on-surface block mb-2">
-                  Categoria *
+                  Categoria
                 </label>
                 <select
                   name="categoryId"
                   value={formData.categoryId}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-lg border border-border-light focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all bg-background-surface"
-                  required
                 >
                   <option value="">Selecciona uma categoria</option>
-                  {CATEGORIES.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
                   ))}
                 </select>
+                {storeCategoriesText && (
+                  <p className="text-body-sm text-on-surface-variant mt-2">
+                    {storeCategoriesText}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -282,7 +306,9 @@ export default function CreateProduct() {
                   required
                 >
                   {CONDITIONS.map(cond => (
-                    <option key={cond.value} value={cond.value}>{cond.label}</option>
+                    <option key={cond.value} value={cond.value}>
+                      {cond.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -290,7 +316,6 @@ export default function CreateProduct() {
           </div>
         </div>
 
-        {/* Imagens */}
         <div className="bg-background-surface border border-border-light rounded-xl p-6">
           <h2 className="font-headline-md text-ink-black mb-4">Imagens do Produto</h2>
           
@@ -317,7 +342,6 @@ export default function CreateProduct() {
               </div>
             ))}
 
-            {/* Upload */}
             {imagePreviews.length < 5 && (
               <label className="aspect-square rounded-lg border-2 border-dashed border-outline-variant flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
                 <input
@@ -341,10 +365,7 @@ export default function CreateProduct() {
           </p>
         </div>
 
-        {/* Status */}
         <div className="bg-background-surface border border-border-light rounded-xl p-6">
-          <h2 className="font-headline-md text-ink-black mb-4">Estado do Produto</h2>
-          
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
@@ -364,7 +385,6 @@ export default function CreateProduct() {
           </label>
         </div>
 
-        {/* Botões de Acção */}
         <div className="flex gap-4">
           <button
             type="button"

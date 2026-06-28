@@ -19,6 +19,9 @@ router.get('/slug/check', validateSlugAvailability, storeController.checkSlug);
 // Pesquisa de lojas
 router.get('/', searchStores, storeController.searchStores);
 
+// Loja do vendedor actual
+router.get('/my-store', authenticate, authorize('SELLER'), storeController.getMyStore);
+
 // Produtos de loja
 router.get('/:slug/products', checkStoreActive, storeController.getStoreProducts);
 
