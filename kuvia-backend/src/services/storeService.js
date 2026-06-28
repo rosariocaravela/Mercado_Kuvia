@@ -27,15 +27,38 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
   }
 
   const categories = (() => {
-    if (Array.isArray(storeData.categories)) return storeData.categories;
+    const normalizeCategory = (value) => {
+      if (typeof value !== 'string') return '';
+      return value.trim().toLowerCase();
+    };
+
+    const values = [];
+    if (Array.isArray(storeData.categories)) {
+      storeData.categories.forEach((item) => {
+        const normalized = normalizeCategory(item);
+        if (normalized) values.push(normalized);
+      });
+      return values;
+    }
+
     if (typeof storeData.categories === 'string') {
       try {
         const parsed = JSON.parse(storeData.categories);
-        return Array.isArray(parsed) ? parsed : [parsed];
+        if (Array.isArray(parsed)) {
+          parsed.forEach((item) => {
+            const normalized = normalizeCategory(item);
+            if (normalized) values.push(normalized);
+          });
+          return values;
+        }
+        const normalized = normalizeCategory(parsed);
+        return normalized ? [normalized] : [];
       } catch (error) {
-        return storeData.categories ? [storeData.categories] : [];
+        const normalized = normalizeCategory(storeData.categories);
+        return normalized ? [normalized] : [];
       }
     }
+
     return [];
   })();
 
@@ -79,9 +102,9 @@ exports.getStoreBySeller = async (sellerId) => {
       {
         model: Seller,
         as: 'seller',
-        attributes: ['id', 'businessName', 'rating', 'verified'],
+        attributes: ['id', 'businessName', 'rating', 'isVerified'],
         include: [
-          { model: User, as: 'user', attributes: ['fullName'] }
+          { model: User, as: 'user', attributes: ['name', 'email'] }
         ]
       }
     ]
@@ -103,13 +126,13 @@ exports.getStorePublicData = async (slug) => {
     include: [
       {
         model: Seller,
-        as: 'owner',
-        attributes: ['id', 'businessName', 'rating', 'verified'],
+        as: 'seller',
+        attributes: ['id', 'businessName', 'rating', 'isVerified'],
         include: [
           {
             model: User,
             as: 'user',
-            attributes: ['fullName']
+            attributes: ['name', 'email']
           }
         ]
       }
@@ -198,9 +221,13 @@ exports.searchStores = async ({
   page = 1, 
   limit = 12,
   categories,
+  category,
   province,
   minRating
 } = {}) => {
+  if (!categories && category) {
+    categories = category;
+  }
   // ✅ CORREÇÃO: is_active (com underscore)
   const where = {
     is_active: true,
@@ -217,8 +244,13 @@ exports.searchStores = async ({
 
   // Filtro por categorias (se Store tem campo categories JSONB)
   if (categories) {
-    const catArray = categories.split(',');
-    where.categories = { [Op.overlap]: catArray };
+    const catArray = Array.isArray(categories)
+      ? categories.map((cat) => String(cat).trim()).filter(Boolean)
+      : categories.split(',').map((cat) => cat.trim()).filter(Boolean);
+
+    if (catArray.length) {
+      where.categories = { [Op.overlap]: catArray };
+    }
   }
 
   // Filtro por avaliação mínima (via seller)
@@ -312,8 +344,8 @@ exports.getSellerStore = async (sellerId) => {
     include: [
       {
         model: Seller,
-        as: 'owner',
-        include: [{ model: User, as: 'user', attributes: ['fullName', 'email'] }]
+        as: 'seller',
+        include: [{ model: User, as: 'user', attributes: ['name', 'email'] }]
       }
     ]
   });

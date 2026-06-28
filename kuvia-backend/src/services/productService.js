@@ -6,7 +6,6 @@ const Seller = require('../models/Seller');
 const Category = require('../models/Category');
 const fs = require('fs');
 const path = require('path');
-const { title } = require('process');
 
 /**
  * Obter produtos do vendedor (via loja)
@@ -74,19 +73,30 @@ exports.getSellerProducts = async (userId, filters = {}) => {
 
 
 async function resolveCategoryId(categoryId) {
+  if (Array.isArray(categoryId)) {
+    categoryId = categoryId[0];
+  }
+
+  if (typeof categoryId === 'object' && categoryId !== null) {
+    categoryId = categoryId.id || categoryId.value || categoryId.slug || categoryId.label || '';
+  }
+
+  if (typeof categoryId === 'string') {
+    categoryId = categoryId.trim();
+  }
+
   if (!categoryId) return null;
-  
 
-  // Accept UUID directly
+  const categoryIdString = String(categoryId).trim();
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (uuidRegex.test(categoryId)) return categoryId;
+  if (uuidRegex.test(categoryIdString)) return categoryIdString;
 
-  // Accept slug or name and resolve to actual category UUID
+  const normalized = categoryIdString.toLowerCase();
   const category = await Category.findOne({
     where: {
       [Op.or]: [
-        { slug: categoryId },
-        { name: categoryId }
+        { slug: normalized },
+        { name: { [Op.iLike]: normalized } }
       ]
     }
   });
@@ -122,6 +132,8 @@ exports.createProduct = async (userId, productData, files = []) => {
 
   const categoryId = await resolveCategoryId(productData.categoryId);
 
+  const isActive = productData.isActive === true || productData.isActive === 'true';
+
   const product = await Product.create({
     name,
     slug: generateSlug(name),
@@ -130,7 +142,7 @@ exports.createProduct = async (userId, productData, files = []) => {
     stock: parseInt(productData.stock || 0),
     categoryId,
     storeId: store.id,
-    isActive: productData.isActive !== false
+    isActive
   });
 
   // imagens
@@ -161,6 +173,7 @@ exports.updateProduct = async (userId, productId, productData, files = []) => {
 
   const resolvedCategoryId = await resolveCategoryId(productData.categoryId ?? product.categoryId);
 
+  const isActive = productData.isActive === true || productData.isActive === 'true';
   const updateData = {
     name: name || product.name,
     slug: name ? generateSlug(name) : product.slug,
@@ -168,7 +181,7 @@ exports.updateProduct = async (userId, productId, productData, files = []) => {
     price: productData.price ? parseFloat(productData.price) : product.price,
     stock: productData.stock ? parseInt(productData.stock) : product.stock,
     categoryId: resolvedCategoryId,
-    isActive: productData.isActive ?? product.isActive
+    isActive: productData.isActive !== undefined ? isActive : product.isActive
   };
 
   await product.update(updateData);

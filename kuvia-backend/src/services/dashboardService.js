@@ -5,6 +5,7 @@ const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
 const Review = require('../models/Review');
 const Seller = require('../models/Seller');
+const Client = require('../models/Client');
 const User = require('../models/User');
 
 /**
@@ -33,7 +34,7 @@ exports.getDashboardData = async (userId) => {
         id: seller.id,
         businessName: seller.businessName,
         rating: seller.rating,
-        verified: seller.verified
+        verified: seller.isVerified
       },
       stats: {
         totalProducts: 0,
@@ -79,7 +80,7 @@ exports.getDashboardData = async (userId) => {
       id: seller.id,
       businessName: seller.businessName,
       rating: seller.rating,
-      verified: seller.verified
+      verified: seller.isVerified
     },
     stats,
     salesData,
@@ -182,9 +183,9 @@ exports.getRecentActivities = async (storeId, limit = 10) => {
     limit: 3,
     order: [['createdAt', 'DESC']],
     include: [{
-      model: User,
-      as: 'customer',
-      attributes: ['fullName']
+      model: Client,
+      as: 'client',
+      include: [{ model: User, as: 'user', attributes: ['name'] }]
     }],
     attributes: ['id', 'status', 'total', 'createdAt']
   }).catch(() => []);
@@ -194,7 +195,7 @@ exports.getRecentActivities = async (storeId, limit = 10) => {
       type: 'order',
       icon: 'shopping_cart',
       title: `Novo pedido: #${order.id.slice(0, 4)}`,
-      subtitle: `${order.customer?.fullName || 'Cliente'} • ${exports.timeAgo(order.createdAt)}`,
+      subtitle: `${order.client?.user?.name || 'Cliente'} • ${exports.timeAgo(order.createdAt)}`,
       timestamp: order.createdAt
     });
   });
@@ -204,9 +205,9 @@ exports.getRecentActivities = async (storeId, limit = 10) => {
     limit: 2,
     order: [['createdAt', 'DESC']],
     include: [{
-      model: User,
-      as: 'customer',
-      attributes: ['fullName']
+      model: Client,
+      as: 'client',
+      include: [{ model: User, as: 'user', attributes: ['name'] }]
     }],
     attributes: ['rating', 'comment', 'createdAt']
   }).catch(() => []);
@@ -216,7 +217,7 @@ exports.getRecentActivities = async (storeId, limit = 10) => {
       type: 'review',
       icon: 'star',
       title: `Nova avaliação (${review.rating} ⭐)`,
-      subtitle: `${review.customer?.fullName || 'Cliente'} • ${exports.timeAgo(review.createdAt)}`,
+      subtitle: `${review.client?.user?.name || 'Cliente'} • ${exports.timeAgo(review.createdAt)}`,
       timestamp: review.createdAt
     });
   });

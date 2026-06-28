@@ -57,8 +57,9 @@ export default function CreateProduct() {
         const storeResponse = await storeService.getMyStore();
         if (storeResponse?.success && Array.isArray(storeResponse.data.categories) && storeResponse.data.categories.length) {
           const storeCategories = storeResponse.data.categories;
-          categoriesList = data.filter(cat => storeCategories.includes(cat.id));
-          setStoreCategoriesText(`Categorias da loja: ${storeCategories.join(', ')}`);
+          categoriesList = data.filter(cat => storeCategories.includes(cat.slug));
+          const visibleNames = categoriesList.map(cat => cat.name).join(', ');
+          setStoreCategoriesText(`Categorias da loja: ${visibleNames}`);
         }
       } catch (storeErr) {
         console.warn('Não foi possível carregar categorias da loja do vendedor:', storeErr);

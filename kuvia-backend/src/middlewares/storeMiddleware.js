@@ -72,7 +72,7 @@ exports.checkStoreOwnership = async (req, res, next) => {
 
     const store = await Store.findOne({ 
       where: { id },
-      include: [{ model: require('../models/Seller'), as: 'owner', attributes: ['userId'] }]
+      include: [{ model: require('../models/Seller'), as: 'seller', attributes: ['userId'] }]
     });
 
     if (!store) {
