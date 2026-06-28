@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productService } from '../../../services/productService';
 import { categoryService } from '../../../services/categoryService';
-import { storeService } from '../../../services/storeService';
 import { formatCurrency } from '../../../utils/formatters';
 
 const CONDITIONS = [
@@ -20,7 +19,6 @@ export default function CreateProduct() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
-  const [storeCategoriesText, setStoreCategoriesText] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -51,21 +49,7 @@ export default function CreateProduct() {
   const loadCategories = async () => {
     try {
       const data = await categoryService.getCategories();
-      let categoriesList = data;
-
-      try {
-        const storeResponse = await storeService.getMyStore();
-        if (storeResponse?.success && Array.isArray(storeResponse.data.categories) && storeResponse.data.categories.length) {
-          const storeCategories = storeResponse.data.categories;
-          categoriesList = data.filter(cat => storeCategories.includes(cat.slug));
-          const visibleNames = categoriesList.map(cat => cat.name).join(', ');
-          setStoreCategoriesText(`Categorias da loja: ${visibleNames}`);
-        }
-      } catch (storeErr) {
-        console.warn('Não foi possível carregar categorias da loja do vendedor:', storeErr);
-      }
-
-      setCategories(categoriesList);
+      setCategories(data);
     } catch (err) {
       console.error('Erro ao carregar categorias:', err);
     }
@@ -138,7 +122,9 @@ export default function CreateProduct() {
       formDataObj.append('currency', formData.currency);
       formDataObj.append('stock', formData.stock);
       formDataObj.append('condition', formData.condition);
-      formDataObj.append('categoryId', formData.categoryId);
+      if (formData.categoryId) {
+        formDataObj.append('categoryId', formData.categoryId);
+      }
       formDataObj.append('isActive', formData.isActive);
 
       formData.images.forEach((image) => {
@@ -288,9 +274,9 @@ export default function CreateProduct() {
                     </option>
                   ))}
                 </select>
-                {storeCategoriesText && (
+                {categories.length === 0 && (
                   <p className="text-body-sm text-on-surface-variant mt-2">
-                    {storeCategoriesText}
+                    Nenhuma categoria encontrada. Crie o produto sem categoria ou atualize suas categorias no admin.
                   </p>
                 )}
               </div>

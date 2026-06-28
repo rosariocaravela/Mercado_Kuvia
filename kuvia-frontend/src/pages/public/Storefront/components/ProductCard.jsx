@@ -13,9 +13,9 @@ export default function ProductCard({ product, storeName, storeWhatsapp }) {
   // Estado do produto
   const isAvailable = product.stock > 0 && product.isActive !== false;
 
-  const handleOrder = () => {
-    // Abre WhatsApp com mensagem pré-preenchida
-    const message = `Olá! Tenho interesse no produto "${product.title}" (${formatCurrency(product.price)}) da sua loja ${storeName}. Está disponível?`;
+    const handleOrder = () => {
+      // Abre WhatsApp com mensagem pré-preenchida
+      const message = `Olá! Tenho interesse no produto "${product.name}" (${formatCurrency(product.price)}) da sua loja ${storeName}. Está disponível?`;
     const phone = storeWhatsapp.replace(/\D/g, '');
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -28,7 +28,7 @@ export default function ProductCard({ product, storeName, storeWhatsapp }) {
         {imageUrl ? (
           <img
             src={imageUrl}
-            alt={product.title}
+              alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
              onError={(e) => {
@@ -59,7 +59,7 @@ export default function ProductCard({ product, storeName, storeWhatsapp }) {
       {/* Informações */}
       <div className="p-4">
         <h3 className="font-label-md text-ink-black mb-1 line-clamp-1">
-          {product.title}
+          {product.name}
         </h3>
         
         <p className="text-primary font-headline-md text-[18px] mb-4">

@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { StoreCreationProvider, useStoreCreation } from '../../context/StoreCreationContext';
 import Step1StoreName from './steps/Step1StoreName';
-import Step2Categories from './steps/Step2Categories';
 import Step3Branding from './steps/Step3Branding';
 
 function WizardContent() {
@@ -9,8 +8,9 @@ function WizardContent() {
   const navigate = useNavigate();
 
   const handleComplete = (store) => {
+    const storeData = store?.data || store || {};
     reset();
-    navigate(`/seller/dashboard?store=${store.slug}`, { state: { message: 'Loja criada com sucesso!' } });
+    navigate(`/seller/dashboard?store=${storeData.slug || ''}`, { state: { message: 'Loja criada com sucesso!' } });
   };
 
   const handleExit = () => {
@@ -31,8 +31,7 @@ function WizardContent() {
 
       <main className="flex-grow flex items-center justify-center p-4 md:p-8">
         {currentStep === 1 && <Step1StoreName onNext={() => updateStep(2)} onBack={() => navigate('/seller/dashboard')} />}
-        {currentStep === 2 && <Step2Categories onNext={() => updateStep(3)} onBack={() => updateStep(1)} />}
-        {currentStep === 3 && <Step3Branding onComplete={handleComplete} onBack={() => updateStep(2)} />}
+        {currentStep === 2 && <Step3Branding onComplete={handleComplete} onBack={() => updateStep(1)} />}
       </main>
 
       <footer className="w-full py-6 px-margin-page border-t border-border-light bg-background-surface">

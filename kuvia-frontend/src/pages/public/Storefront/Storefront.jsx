@@ -45,7 +45,7 @@ export default function Storefront() {
           // Extrair categorias únicas dos produtos
           const uniqueCategories = [...new Set(
             productsList
-              .map(p => p.category?.name)
+                  .map(p => p.category?.name)
               .filter(Boolean)
           )].map(name => ({ name }));
           setCategories(uniqueCategories);
@@ -71,7 +71,7 @@ export default function Storefront() {
     if (search && search.trim()) {
       const searchLower = search.toLowerCase();
       filtered = filtered.filter(p =>
-        p.title?.toLowerCase().includes(searchLower) ||
+        p.name?.toLowerCase().includes(searchLower) ||
         p.description?.toLowerCase().includes(searchLower)
       );
     }

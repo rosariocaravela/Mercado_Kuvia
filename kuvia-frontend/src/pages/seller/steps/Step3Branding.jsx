@@ -32,7 +32,6 @@ export default function Step3Branding({ onComplete, onBack }) {
       const formData = new FormData();
       formData.append('name', storeData.name);
       formData.append('slug', storeData.slug);
-      formData.append('categories', JSON.stringify(storeData.categories));
       formData.append('whatsapp_number', whatsappFormatted); // ✅ WhatsApp formatado
       formData.append('description', storeData.description || '');
       formData.append('theme_config', JSON.stringify(storeData.theme || { primaryColor: '#0050cb' }));
@@ -52,7 +51,7 @@ export default function Step3Branding({ onComplete, onBack }) {
       console.log('✅ Loja criada com sucesso:', response);
 
       setPublished(true);
-      setTimeout(() => onComplete(response.data), 2000);
+      setTimeout(() => onComplete(response.data?.data || response.data), 2000);
 
     } catch (err) {
       console.error('❌ Erro ao publicar loja:', err);
@@ -95,7 +94,7 @@ export default function Step3Branding({ onComplete, onBack }) {
 
   return (
     <div className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <WizardProgress currentStep={3} />
+      <WizardProgress currentStep={2} totalSteps={2} />
 
       <div className="bg-background-surface rounded-xl border border-border-light shadow-lg p-8 md:p-10">
         <div className="mb-8">
@@ -134,7 +133,6 @@ export default function Step3Branding({ onComplete, onBack }) {
             storeName={storeData.name}
             logoUrl={logoPreview}
             bannerUrl={bannerPreview}
-            categories={storeData.categories}
           />
 
           {/* Botões */}

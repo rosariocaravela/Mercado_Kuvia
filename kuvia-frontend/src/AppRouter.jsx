@@ -24,6 +24,7 @@ import SellerAnalytics from './pages/seller/Analytics/Analytics';
 import SellerStoreSettings from './pages/seller/StoreSettings/StoreSettings';
 import SellerProfile from './pages/seller/Profile/SellerProfile';
 import CreateStoreWizard from './pages/seller/CreateStoreWizard';
+import SellerStoreRedirect from './pages/seller/StoreRedirect';
 import SellerLayout from './components/layout/SellerLayout';
 import Products from './pages/seller/Products/Products';
 import CreateProduct from './pages/seller/Products/CreateProduct';
@@ -194,7 +195,7 @@ function AppRouter() {
         <Route path="more" element={<ComingSoon title="Mais Opções" />} />
 
         {/* Redirecionar /seller/store para a loja pública do vendedor */}
-        <Route path="store" element={<Navigate to="/store/minha-loja" replace />} />
+        <Route path="store" element={<SellerStoreRedirect />} />
       </Route>
 
       {/* ✨ Wizard de criação de loja (SEM sidebar - layout próprio) */}

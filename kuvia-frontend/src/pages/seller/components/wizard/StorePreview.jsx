@@ -1,4 +1,4 @@
-export default function StorePreview({ storeName, logoUrl, bannerUrl, categories }) {
+export default function StorePreview({ storeName, logoUrl, bannerUrl }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

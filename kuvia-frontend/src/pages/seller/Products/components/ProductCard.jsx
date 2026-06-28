@@ -36,7 +36,7 @@ export default function ProductCard({ product, onEdit, onDelete, onToggleStatus 
         {imageUrl ? (
           <img
             src={imageUrl}
-            alt={product.title}
+            alt={product.name}
             className="w-full h-full object-cover"
             loading="lazy"
           />
@@ -72,7 +72,7 @@ export default function ProductCard({ product, onEdit, onDelete, onToggleStatus 
       {/* Informações */}
       <div className="p-4">
         <h3 className="font-label-md text-ink-black mb-1 line-clamp-1">
-          {product.title}
+          {product.name}
         </h3>
         
         <p className="text-primary font-headline-md text-[18px] mb-2">
@@ -135,7 +135,7 @@ export default function ProductCard({ product, onEdit, onDelete, onToggleStatus 
           <div className="bg-background-surface rounded-xl p-6 max-w-md w-full">
             <h3 className="font-headline-md text-ink-black mb-2">Eliminar Produto</h3>
             <p className="font-body-md text-on-surface-variant mb-6">
-              Tens a certeza que queres eliminar "{product.title}"? Esta acção não pode ser desfeita.
+              Tens a certeza que queres eliminar "{product.name}"? Esta acção não pode ser desfeita.
             </p>
             <div className="flex gap-3">
               <button

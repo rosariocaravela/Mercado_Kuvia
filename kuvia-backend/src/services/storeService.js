@@ -1,6 +1,7 @@
 const { Op, Sequelize } = require('sequelize');
 const Store = require('../models/Store');
 const Product = require('../models/Product');
+const ProductImage = require('../models/ProductImage');
 const Category = require('../models/Category');
 const Seller = require('../models/Seller');
 const User = require('../models/User');
@@ -186,6 +187,11 @@ exports.getStoreProducts = async (storeId, {
         model: Category,
         as: 'category',
         attributes: ['id', 'name', 'slug', 'icon']
+      },
+      {
+        model: ProductImage,
+        as: 'images',
+        attributes: ['id', 'url', 'isPrimary', 'order']
       }
     ],
     limit,
@@ -197,7 +203,6 @@ exports.getStoreProducts = async (storeId, {
       'slug',
       'price',
       'stock',
-      'images',
       'storeId',
       'createdAt',
       'views'
@@ -242,14 +247,40 @@ exports.searchStores = async ({
     ];
   }
 
-  // Filtro por categorias (se Store tem campo categories JSONB)
+  let categoryList = [];
   if (categories) {
-    const catArray = Array.isArray(categories)
+    categoryList = Array.isArray(categories)
       ? categories.map((cat) => String(cat).trim()).filter(Boolean)
       : categories.split(',').map((cat) => cat.trim()).filter(Boolean);
 
-    if (catArray.length) {
-      where.categories = { [Op.overlap]: catArray };
+    if (categoryList.length) {
+      const filteredProducts = await Product.findAll({
+        where: {},
+        include: [
+          {
+            model: Category,
+            as: 'category',
+            required: true,
+            attributes: [],
+            where: { slug: { [Op.in]: categoryList } }
+          }
+        ],
+        attributes: ['storeId'],
+        group: ['Product.storeId']
+      });
+
+      const storeIds = filteredProducts.map((product) => product.storeId);
+      if (storeIds.length === 0) {
+        return {
+          count: 0,
+          stores: [],
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: 0
+        };
+      }
+
+      where.id = { [Op.in]: storeIds };
     }
   }
 
@@ -261,16 +292,19 @@ exports.searchStores = async ({
 
   const offset = (parseInt(page) - 1) * parseInt(limit);
 
+  const include = [
+    {
+      model: Seller,
+      as: 'seller',
+      attributes: ['id', 'businessName', 'rating'],
+      include: [{ model: User, as: 'user', attributes: ['name'] }]
+    }
+  ];
+
   const { count, rows } = await Store.findAndCountAll({
     where,
-    include: [
-      {
-        model: Seller,
-        as: 'seller',
-        attributes: ['id', 'businessName', 'rating'],
-        include: [{ model: User, as: 'user', attributes: ['name'] }]
-      }
-    ],
+    distinct: true,
+    include,
     limit: parseInt(limit),
     offset,
     order: [['id', 'DESC']],
@@ -281,8 +315,9 @@ exports.searchStores = async ({
       'name', 
       'description', 
       'logo_url', 
-      'banner_url',  // ← ADICIONAR
+      'banner_url',
       'whatsapp_number',
+      'categories'
     ]
   });
 

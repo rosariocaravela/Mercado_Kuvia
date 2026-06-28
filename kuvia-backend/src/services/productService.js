@@ -130,7 +130,7 @@ exports.createProduct = async (userId, productData, files = []) => {
     throw new Error('Preço inválido');
   }
 
-  const categoryId = await resolveCategoryId(productData.categoryId);
+  const categoryId = productData.categoryId ? await resolveCategoryId(productData.categoryId) : null;
 
   const isActive = productData.isActive === true || productData.isActive === 'true';
 

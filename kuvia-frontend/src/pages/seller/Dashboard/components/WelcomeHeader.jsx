@@ -16,8 +16,9 @@ export default function WelcomeHeader({ storeSlug }) {
       </div>
       <div className="flex gap-3">
         <button
-          onClick={() => navigate(`/store/${storeSlug}`)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-background-surface border border-border-light rounded-lg font-label-md text-on-surface-variant hover:bg-surface-container-low transition-all"
+          onClick={() => storeSlug && navigate(`/store/${storeSlug}`)}
+          disabled={!storeSlug}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-label-md transition-all ${storeSlug ? 'bg-background-surface border border-border-light text-on-surface-variant hover:bg-surface-container-low' : 'bg-surface-container-low border border-border-light text-on-surface/60 cursor-not-allowed'}`}
         >
           <span className="material-symbols-outlined">visibility</span>
           Ver Minha Loja

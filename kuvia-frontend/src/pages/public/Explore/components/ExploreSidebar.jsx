@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { categoryService } from '../../../../services/categoryService';
 
-const CATEGORIES = [
+const FALLBACK_CATEGORIES = [
   { id: 'fashion', label: 'Moda & Vestuário' },
   { id: 'electronics', label: 'Electrónica' },
   { id: 'home', label: 'Casa & Decoração' },
@@ -17,16 +18,24 @@ const PROVINCES = [
 
 export default function ExploreSidebar({ filters, onFilterChange, onClear }) {
   const [localSearch, setLocalSearch] = useState(filters.search || '');
+  const [availableCategories, setAvailableCategories] = useState([]);
 
-  // Debounce da pesquisa (espera 500ms após parar de digitar)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localSearch !== filters.search) {
-        onFilterChange({ ...filters, search: localSearch, page: 1 });
+    setLocalSearch(filters.search || '');
+  }, [filters.search]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categories = await categoryService.getCategories();
+        setAvailableCategories(categories.map((cat) => ({ id: cat.slug, label: cat.name })));
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
       }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [localSearch]);
+    };
+
+    loadCategories();
+  }, []);
 
   const toggleCategory = (catId) => {
     const current = filters.categories || [];
@@ -35,6 +44,8 @@ export default function ExploreSidebar({ filters, onFilterChange, onClear }) {
       : [...current, catId];
     onFilterChange({ ...filters, categories: newCategories, page: 1 });
   };
+
+  const categoryOptions = availableCategories.length ? availableCategories : FALLBACK_CATEGORIES;
 
   return (
     <aside className="w-full md:w-80 shrink-0 space-y-8">
@@ -73,7 +84,7 @@ export default function ExploreSidebar({ filters, onFilterChange, onClear }) {
         <div className="space-y-3 mb-6">
           <p className="font-label-md text-label-md text-ink-black">Categorias</p>
           <div className="space-y-2">
-            {CATEGORIES.map((cat) => (
+            {categoryOptions.map((cat) => (
               <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
                 <input
                   type="checkbox"

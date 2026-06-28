@@ -28,7 +28,7 @@ export default function Step1StoreName({ onNext, onBack }) {
 
   return (
     <div className="w-full max-w-[560px] animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <WizardProgress currentStep={1} />
+      <WizardProgress currentStep={1} totalSteps={2} />
 
       <div className="bg-background-surface border border-border-light rounded-xl shadow-sm p-8 md:p-10">
         <div className="mb-8">
