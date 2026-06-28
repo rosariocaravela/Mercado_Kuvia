@@ -9,6 +9,7 @@ import WhatsAppButton from '../../../components/common/WhatsAppButton';
 export default function Storefront() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [store, setStore] = useState(null);
   const [products, setProducts] = useState([]);
@@ -172,12 +173,35 @@ export default function Storefront() {
             </Link>
             <Link
               to="/register"
-              className="bg-primary-container text-on-primary-container font-label-md text-label-md px-5 py-2.5 rounded-full hover:shadow-lg transition-all active:scale-95"
+              className="hidden md:block bg-primary-container text-on-primary-container font-label-md text-label-md px-5 py-2.5 rounded-full hover:shadow-lg transition-all active:scale-95"
             >
               Criar Loja
             </Link>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen(prev => !prev)}
+              className="md:hidden p-2 rounded-md bg-transparent border border-border-light"
+              aria-label="Abrir menu"
+            >
+              <span className="material-symbols-outlined">
+                {mobileMenuOpen ? 'close' : 'menu'}
+              </span>
+            </button>
           </div>
         </div>
+
+        {/* Mobile panel */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-background-surface border-t border-border-light">
+            <div className="px-margin-page max-w-container-max mx-auto py-4 flex flex-col gap-3">
+              <Link to={`/store/${slug}`} className="font-label-md text-label-md text-ink-black" onClick={() => setMobileMenuOpen(false)}>Loja</Link>
+              <Link to="/explore" className="font-label-md text-label-md text-ink-black" onClick={() => setMobileMenuOpen(false)}>Explorar</Link>
+              <Link to="/login" className="font-label-md text-label-md text-ink-black" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              <Link to="/register" className="font-label-md text-label-md text-ink-black" onClick={() => setMobileMenuOpen(false)}>Criar Loja</Link>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Conteúdo Principal */}

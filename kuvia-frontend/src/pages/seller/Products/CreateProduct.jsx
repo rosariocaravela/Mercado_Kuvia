@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productService } from '../../../services/productService';
 import { categoryService } from '../../../services/categoryService';
+import { storeService } from '../../../services/storeService';
 import { formatCurrency } from '../../../utils/formatters';
 
 const CONDITIONS = [
@@ -16,6 +17,8 @@ export default function CreateProduct() {
   const isEditing = !!id;
 
   const [loading, setLoading] = useState(false);
+  const [checkingStore, setCheckingStore] = useState(true);
+  const [hasStore, setHasStore] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
@@ -37,7 +40,26 @@ export default function CreateProduct() {
   // Carregar categorias
   useEffect(() => {
     loadCategories();
+    checkMyStore();
   }, []);
+
+  const checkMyStore = async () => {
+    setCheckingStore(true);
+    try {
+      const res = await storeService.getMyStore();
+      // API returns success:false or 404 when no store
+      if (res && res.success !== false && res.data) {
+        setHasStore(true);
+      } else {
+        setHasStore(false);
+      }
+    } catch (err) {
+      // assume no store on error
+      setHasStore(false);
+    } finally {
+      setCheckingStore(false);
+    }
+  };
 
   // Carregar produto se estiver a editar
   useEffect(() => {
@@ -152,6 +174,38 @@ export default function CreateProduct() {
     return (
       <div className="px-margin-page py-8 flex items-center justify-center min-h-[400px]">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (checkingStore) {
+    return (
+      <div className="px-margin-page py-8 flex items-center justify-center min-h-[300px]">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!hasStore && !isEditing) {
+    return (
+      <div className="px-margin-page py-8 max-w-4xl mx-auto">
+        <div className="mb-6 p-6 bg-warning-container border border-warning/30 rounded-lg text-warning font-body-md">
+          Antes de adicionar produtos, por favor crie e publique a sua loja.
+        </div>
+        <div className="flex gap-4">
+          <button
+            onClick={() => navigate('/seller/criar-loja')}
+            className="bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md"
+          >
+            Publicar Loja
+          </button>
+          <button
+            onClick={() => navigate('/seller')}
+            className="bg-surface-container-low px-6 py-3 rounded-lg font-label-md"
+          >
+            Voltar
+          </button>
+        </div>
       </div>
     );
   }

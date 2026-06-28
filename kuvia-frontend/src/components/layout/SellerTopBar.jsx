@@ -1,7 +1,9 @@
 import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export default function SellerTopBar({ title = 'Minha Loja Digital' }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // ✅ Capitaliza primeira letra
   const capitalize = (text) => {
@@ -51,6 +53,15 @@ export default function SellerTopBar({ title = 'Minha Loja Digital' }) {
       <h1 className="font-headline-md text-headline-md font-bold text-ink-black">{title}</h1>
 
       <div className="flex items-center gap-4">
+        {/* Publicar Loja (visível apenas em telas pequenas, já que a sidebar fica oculta) */}
+        {user && user.role === 'SELLER' && (
+          <button
+            onClick={() => navigate('/seller/criar-loja')}
+            className="md:hidden bg-primary text-white px-3 py-2 rounded-lg font-label-sm"
+          >
+            Publicar Loja
+          </button>
+        )}
         {/* Status Online */}
         <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-full">
           <span className="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
