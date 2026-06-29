@@ -34,6 +34,7 @@ import AdminDashboard from './pages/admin/Dashboard/AdminDashboard';
 import AdminUsers from './pages/admin/Users/Users';
 import AdminStores from './pages/admin/Stores/Stores';
 import AdminReports from './pages/admin/Reports/Reports';
+import SellerApprovals from './pages/admin/Sellers/SellerApprovals';
 
 // Componente de Loading
 function Loading() {
@@ -232,6 +233,14 @@ function AppRouter() {
         element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
             <AdminStores />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/sellers"
+        element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <SellerApprovals />
           </ProtectedRoute>
         }
       />

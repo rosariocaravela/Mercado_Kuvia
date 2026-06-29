@@ -1,5 +1,6 @@
 const { sequelize } = require('../models');
 const seedCategories = require('./seeds/seedCategories');
+const seedAdminUser = require('./seedAdmin');
 
 async function initDatabase() {
     try {
@@ -11,6 +12,9 @@ async function initDatabase() {
 
         // Seed default categories (idempotent)
         await seedCategories();
+
+        // Criar/garantir o utilizador administrador a partir de variáveis de ambiente
+        await seedAdminUser();
 
     } catch (error) {
         console.error('❌ Erro ao conectar ao banco de dados:', error);
