@@ -82,11 +82,11 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
   }
 
   if (files.logo?.[0]) {
-    data.logo_url = `/uploads/stores/${files.logo[0].filename}`;
+    data.logo_url = files.logo[0].secure_url || files.logo[0].path; // URL Cloudinary
   }
 
   if (files.banner?.[0]) {
-    data.banner_url = `/uploads/stores/${files.banner[0].filename}`;
+    data.banner_url = files.banner[0].secure_url || files.banner[0].path; // URL Cloudinary
   }
 
   const store = await Store.create(data);
@@ -337,12 +337,12 @@ exports.updateStore = async (storeId, updates, files = {}) => {
   const store = await Store.findByPk(storeId);
   if (!store) throw new Error('Loja não encontrada');
 
-  // Processar uploads se existirem
+  // Processar uploads se existirem - URLs Cloudinary
   if (files.logo?.[0]) {
-    updates.logo_url = `/uploads/stores/${files.logo[0].filename}`;
+    updates.logo_url = files.logo[0].secure_url || files.logo[0].path;
   }
   if (files.banner?.[0]) {
-    updates.banner_url = `/uploads/stores/${files.banner[0].filename}`;
+    updates.banner_url = files.banner[0].secure_url || files.banner[0].path;
   }
 
   // Actualizar campos permitidos

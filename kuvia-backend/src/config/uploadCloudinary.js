@@ -41,7 +41,7 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB máximo por imagem
+    fileSize: 50 * 1024 * 1024, // 50MB máximo por imagem (Cloudinary pode receber)
     files: 10 // Múltiplos uploads
   }
 });

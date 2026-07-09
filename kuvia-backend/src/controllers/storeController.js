@@ -52,6 +52,12 @@ exports.createStore = async (req, res) => {
       req.files
     );
 
+    console.log('✅ LOJA CRIADA COM SUCESSO!');
+    console.log('Loja ID:', store.id);
+    console.log('Logo URL:', store.logo_url);
+    console.log('Banner URL:', store.banner_url);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
     return res.status(201).json({
       success: true,
       message: 'Loja criada com sucesso!',

@@ -4,8 +4,6 @@ const ProductImage = require('../models/ProductImage');
 const Store = require('../models/Store');
 const Seller = require('../models/Seller');
 const Category = require('../models/Category');
-const fs = require('fs');
-const path = require('path');
 
 /**
  * Obter produtos do vendedor (via loja)
@@ -145,12 +143,12 @@ exports.createProduct = async (userId, productData, files = []) => {
     isActive
   });
 
-  // imagens
+  // imagens - Salvar URLs Cloudinary
   if (files?.length > 0) {
     await ProductImage.bulkCreate(
       files.map((file, index) => ({
         productId: product.id,
-        url: `/uploads/products/${file.filename}`,
+        url: file.secure_url || file.path, // URL Cloudinary
         isPrimary: index === 0,
         order: index
       }))
@@ -194,7 +192,7 @@ exports.updateProduct = async (userId, productId, productData, files = []) => {
     await ProductImage.bulkCreate(
       files.map((file, index) => ({
         productId: product.id,
-        url: `/uploads/products/${file.filename}`,
+        url: file.secure_url || file.path, // URL Cloudinary
         isPrimary: existingImagesCount === 0 && index === 0,
         order: existingImagesCount + index
       }))
@@ -213,19 +211,13 @@ exports.deleteProduct = async (userId, productId) => {
   const product = await this.getProductById(userId, productId);
   if (!product) throw new Error('Produto não encontrado');
 
-  // 1. Apagar ficheiros de imagem do disco
-  const images = await ProductImage.findAll({ where: { productId: product.id } });
-  images.forEach(image => {
-    const filePath = path.join(__dirname, '..', image.url);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-  });
-
-  // 2. Apagar registos de imagens na BD
+  // Com Cloudinary, as imagens são automaticamente geridas na cloud
+  // Apenas apagamos os registos da BD
+  
+  // 1. Apagar registos de imagens na BD
   await ProductImage.destroy({ where: { productId: product.id } });
 
-  // 3. Apagar produto
+  // 2. Apagar produto
   await product.destroy();
 };
 
