@@ -5,7 +5,7 @@ const storeController = require('../controllers/storeController');
 const { createStore, updateStore, searchStores } = require('../validators/storeValidator');
 const { checkStoreActive, checkStoreOwnership, validateSlugAvailability } = require('../middlewares/storeMiddleware');
 const { authenticate, authorize } = require('../middlewares/authMiddleware');
-const upload = require('../config/upload');
+const upload = require('../config/uploadCloudinary');
 
 
 // 🔓 ROTAS PÚBLICAS

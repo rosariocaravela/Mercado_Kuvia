@@ -32,3 +32,7 @@ kuvia-frontend/build/
 
 # Cache
 .cache/
+
+# Vite output variations
+dist-ssr
+*.local

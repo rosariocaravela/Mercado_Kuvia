@@ -275,6 +275,7 @@ export default function CreateProduct() {
                 <label className="font-label-md text-on-surface block mb-2">
                   Preço (MT) *
                 </label>
+                
                 <input
                   type="number"
                   name="price"

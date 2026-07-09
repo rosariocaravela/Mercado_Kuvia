@@ -34,10 +34,10 @@ try {
 }
 
 try {
-  upload = require('../config/upload');
+  upload = require('../config/uploadCloudinary');
 } catch (error) {
-  console.error('❌ Erro ao importar upload:', error.message);
-  throw new Error('Configuração de upload não encontrada');
+  console.error('❌ Erro ao importar upload Cloudinary:', error.message);
+  throw new Error('Configuração de upload Cloudinary não encontrada');
 }
 
 // ✅ Middleware de autenticação para todas as rotas
