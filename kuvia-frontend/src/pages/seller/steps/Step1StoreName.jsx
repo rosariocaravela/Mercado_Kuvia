@@ -68,7 +68,7 @@ export default function Step1StoreName({ onNext, onBack }) {
               <input
                 id="whatsapp"
                 type="tel"
-                value={storeData.whatsapp}
+                value={storeData.whatsapp} 
                 onChange={handleWhatsAppChange}
                 placeholder="+258 84 123 4567"
                 className={`w-full px-4 py-4 pl-12 rounded-lg border transition-all outline-none font-body-md text-ink-black placeholder:text-outline-variant

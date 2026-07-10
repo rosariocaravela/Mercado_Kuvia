@@ -1,9 +1,15 @@
 const authService = require('../services/authService');
 const response = require('../utils/response');
 
+// Controller de autenticação: camada fina entre HTTP e serviços.
+// - Validations básicas são feitas aqui; regras de negócio críticas ficam nos serviços.
+// - Todas as rotas que alteram dados sensíveis exigem autenticação via middleware `authenticate`.
+
 /**
  * Registar cliente
  * POST /api/auth/register/client
+ * - Validação leve: assegurar campos obrigatórios antes de delegar ao serviço.
+ * - Motivo: evitar trabalhar com payloads incompletos e reduzir custo de queries.
  */
 exports.registerClient = async (req, res) => {
   try {
@@ -31,6 +37,7 @@ exports.registerClient = async (req, res) => {
 /**
  * Registar vendedor
  * POST /api/auth/register/seller
+ * - Valida campos obrigatórios e delega validações de domínio ao serviço.
  */
 exports.registerSeller = async (req, res) => {
   try {
@@ -56,6 +63,8 @@ exports.registerSeller = async (req, res) => {
 /**
  * Login
  * POST /api/auth/login
+ * - Aceita `identifier` (email ou telefone) + senha.
+ * - Respostas de erro são genéricas para não revelar existência de contas.
  */
 exports.login = async (req, res) => {
   try {
@@ -78,6 +87,7 @@ exports.login = async (req, res) => {
 /**
  * Obter utilizador atual
  * GET /api/auth/me
+ * - Requer middleware `authenticate` que popula `req.user` a partir do JWT.
  */
 exports.getCurrentUser = async (req, res) => {
   try {
@@ -95,6 +105,7 @@ exports.getCurrentUser = async (req, res) => {
 /**
  * Atualizar perfil
  * PUT /api/auth/profile
+ * - Apenas campos permitidos devem ser aplicados (serviço faz filtragem).
  */
 exports.updateProfile = async (req, res) => {
   try {
@@ -113,6 +124,8 @@ exports.updateProfile = async (req, res) => {
 /**
  * Alterar senha
  * POST /api/auth/change-password
+ * - Valida senha atual antes de aplicar a nova (evita sobrescrever sem confirmação).
+ * - Nova senha tem requisito mínimo de segurança (ex.: 6 caracteres aqui).
  */
 exports.changePassword = async (req, res) => {
   try {

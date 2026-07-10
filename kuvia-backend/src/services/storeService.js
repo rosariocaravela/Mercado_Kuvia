@@ -18,6 +18,9 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
     throw new Error('Este vendedor já possui uma loja.');
   }
 
+  // Normalização de número WhatsApp
+  // - Garante formato internacional com o código do país (+258).
+  // - Importante para integração com links/serviços externos (ex.: WhatsApp API).
   let whatsapp = storeData.whatsapp_number || '';
   const whatsappClean = whatsapp.replace(/\D/g, '');
 
@@ -63,6 +66,8 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
     return [];
   })();
 
+  // Preparar payload para a criação da loja
+  // - `is_active` e `status` controlam visibilidade pública e fluxo de aprovação.
   const data = {
     name: storeData.name,
     slug: storeData.slug?.toLowerCase(),
@@ -81,6 +86,7 @@ exports.createStore = async (sellerId, storeData, files = {}) => {
         : storeData.theme_config;
   }
 
+  // URLs de imagens: preferir `secure_url` retornado pelo Cloudinary
   if (files.logo?.[0]) {
     data.logo_url = files.logo[0].secure_url || files.logo[0].path; // URL Cloudinary
   }
@@ -233,7 +239,7 @@ exports.searchStores = async ({
   if (!categories && category) {
     categories = category;
   }
-  // ✅ CORREÇÃO: is_active (com underscore)
+
   const where = {
     is_active: true,
     status: 'APPROVED'
@@ -286,8 +292,7 @@ exports.searchStores = async ({
 
   // Filtro por avaliação mínima (via seller)
   if (minRating) {
-    // Nota: rating está no Seller, não na Store
-    // Requer join ou subquery
+    // Nota: rating está no Seller, não na Store — requer join ou subquery
   }
 
   const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -308,7 +313,7 @@ exports.searchStores = async ({
     limit: parseInt(limit),
     offset,
     order: [['id', 'DESC']],
-    // ✅ Adicionar mais campos úteis
+    // Adicionar mais campos úteis
     attributes: [
       'id', 
       'slug', 

@@ -2,7 +2,10 @@ const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('./cloudinary');
 
-// ✅ Configuração do Cloudinary Storage
+// Integração com Cloudinary (serviço externo)
+// - Credenciais via variáveis de ambiente em `src/config/cloudinary.js`.
+// - Converter para `webp` reduz largura de banda/armazenamento; confirme compatibilidade.
+// Configuração do Cloudinary Storage
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
@@ -26,7 +29,7 @@ const storage = new CloudinaryStorage({
   }
 });
 
-// ✅ Filtro de arquivos
+// Filtro de arquivos
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   if (allowedTypes.includes(file.mimetype)) {
@@ -36,7 +39,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// ✅ Configuração final do multer com Cloudinary
+// Configuração final do multer com Cloudinary
 const upload = multer({
   storage,
   fileFilter,
