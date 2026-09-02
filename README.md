@@ -1,283 +1,95 @@
-# 🛍️ Kuvia - Plataforma de Criação de Lojas Online
+# Kuvia — Comércio Local
 
-Kuvia é uma plataforma SaaS que permite a pequenos negócios, empreendedores e vendedores independentes em Moçambique criarem a sua própria loja online com URL personalizado.
+> Plataforma full-stack que permite a pequenos negócios moçambicanos criar uma loja online e apresentar os seus produtos na internet.
 
-## 🎯 Visão do Produto
+![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=nodedotjs&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Sequelize-4169E1?logo=postgresql&logoColor=white)
+![Status](https://img.shields.io/badge/status-MVP_em_evolução-f59e0b)
 
-A Kuvia NÃO é um marketplace tradicional. É uma **Store Creation Platform (Store Builder)** onde utilizadores podem criar as suas próprias lojas online com marca, receber um URL único, adicionar produtos e partilhar as suas lojas com clientes.
+## Sobre o projeto
 
-### Exemplos de URLs:
-- `kuvia.co.mz/antonio-electronics`
-- `kuvia.co.mz/maria-fashion`
-- `kuvia.co.mz/home-style`
+A **Kuvia** é uma plataforma de criação de lojas online orientada ao comércio local. Cada vendedor pode criar uma loja, adicionar produtos e partilhar a sua presença digital com clientes.
 
-## 👥 Tipos de Utilizadores
+O objetivo é reduzir a barreira de entrada de pequenos comerciantes no comércio eletrónico, oferecendo uma solução simples para gerir a loja e divulgar produtos.
 
-### 1. **Cliente (Comprador)**
-- Descobre lojas e produtos locais
-- Pesquisa produtos
-- Contacta vendedores via WhatsApp
-- Guarda favoritos
-- Faz pedidos
+## Funcionalidades implementadas
 
-### 2. **Vendedor (Dono de Loja)**
-- Cria loja online personalizada
-- Publica produtos
-- Gere pedidos
-- Recebe pagamentos via WhatsApp
-- Analisa métricas da loja
+- Registo e autenticação com JWT.
+- Perfis de **Cliente**, **Vendedor** e **Administrador**.
+- Criação e gestão de lojas.
+- Cadastro de produtos com imagens no Cloudinary.
+- Pesquisa e filtros de produtos por categoria.
+- Painel do vendedor com informações da loja.
+- Área administrativa para validação e moderação de produtos.
+- Interface responsiva para computador e dispositivos móveis.
+- Endpoint de saúde da API em `/api/health`.
 
-### 3. **Administrador**
-- Aprova lojas
-- Gere utilizadores
-- Modera conteúdo
-- Vê analytics da plataforma
+## Arquitetura
 
-## 🛠️ Stack Tecnológica
-
-### Backend
-- **Node.js** + **Express.js** (servidor)
-- **PostgreSQL** (banco de dados)
-- **Sequelize** (ORM)
-- **JWT** (autenticação)
-- **bcryptjs** (encriptação de senhas)
-- **CORS** (cross-origin)
-- **dotenv** (variáveis de ambiente)
-- **express-validator** (validação)
-- **multer** (upload de ficheiros)
-
-### Frontend
-- **React 18** + **Vite** (framework)
-- **React Router** (navegação)
-- **Axios** (requisições HTTP)
-- **Context API** (estado global)
-- **Tailwind CSS** (estilização)
-- **ESLint** (linting)
-
-## 📁 Estrutura Completa do Projeto
-
-```
-KUVIA/
-│
-├── README.md                           # Este arquivo
-│
-├── kuvia-backend/                      # Backend da aplicação
-│   ├── src/
-│   │   ├── app.js                      # Configuração principal do Express
-│   │   ├── config/                     # Configurações da aplicação
-│   │   │   ├── cors.js                # Configuração CORS
-│   │   │   ├── database.js            # Conexão com BD
-│   │   │   └── jwt.js                 # Configuração JWT
-│   │   │
-│   │   ├── controllers/                # Controladores (lógica de requisições)
-│   │   │   ├── authController.js      # Auth (login, register)
-│   │   │   ├── messageController.js   # Mensagens entre clientes
-│   │   │   ├── orderController.js     # Pedidos de compra
-│   │   │   ├── productController.js   # Produtos
-│   │   │   ├── storeController.js     # Lojas
-│   │   │   └── userController.js      # Utilizadores
-│   │   │
-│   │   ├── database/                   # Migrações e seeders
-│   │   │   ├── migrations/
-│   │   │   │   └── 001-create-tables.js
-│   │   │   └── seeders/
-│   │   │       └── 001-initial-data.js
-│   │   │
-│   │   ├── middlewares/                # Middlewares
-│   │   │   ├── authMiddleware.js      # Validar token JWT
-│   │   │   ├── errorMiddleware.js     # Tratamento de erros
-│   │   │   ├── roleMiddleware.js      # Verificar permissões
-│   │   │   └── validationMiddleware.js# Validar dados
-│   │   │
-│   │   ├── models/                     # Modelos Sequelize (BD)
-│   │   │   ├── Category.js            # Categorias de produtos
-│   │   │   ├── Client.js              # Clients (compradores)
-│   │   │   ├── Message.js             # Mensagens
-│   │   │   ├── Order.js               # Pedidos
-│   │   │   ├── OrderItem.js           # Items dentro pedidos
-│   │   │   ├── Product.js             # Produtos
-│   │   │   ├── Review.js              # Reviews/Avaliações
-│   │   │   ├── Seller.js              # Vendedores
-│   │   │   ├── Store.js               # Lojas online
-│   │   │   ├── User.js                # Utilizadores (base)
-│   │   │   └── index.js               # Exportar modelos
-│   │   │
-│   │   ├── routes/                     # Rotas da API
-│   │   │   ├── authRoutes.js          # /api/auth
-│   │   │   ├── messageRoutes.js       # /api/messages
-│   │   │   ├── orderRoutes.js         # /api/orders
-│   │   │   ├── productRoutes.js       # /api/products
-│   │   │   ├── storeRoutes.js         # /api/stores
-│   │   │   ├── userRoutes.js          # /api/users
-│   │   │   └── index.js               # Agregar todas rotas
-│   │   │
-│   │   ├── services/                   # Serviços (lógica de negócio)
-│   │   │   ├── authService.js         # Lógica de autenticação
-│   │   │   ├── messageService.js      # Lógica de mensagens
-│   │   │   ├── orderService.js        # Lógica de pedidos
-│   │   │   ├── productService.js      # Lógica de produtos
-│   │   │   ├── storeService.js        # Lógica de lojas
-│   │   │   └── userService.js         # Lógica de utilizadores
-│   │   │
-│   │   ├── uploads/                    # Ficheiros enviados
-│   │   │   ├── products/              # Imagens de produtos
-│   │   │   └── stores/                # Imagens de lojas
-│   │   │
-│   │   ├── utils/                      # Utilitários
-│   │   │   ├── jwt.js                 # Funções JWT
-│   │   │   ├── password.js            # Funções de password
-│   │   │   ├── response.js            # Respostas padronizadas
-│   │   │   └── validators.js          # Validações
-│   │   │
-│   │   └── validators/                 # Schemas de validação
-│   │       ├── authValidator.js       # Validação auth
-│   │       ├── orderValidator.js      # Validação pedidos
-│   │       ├── productValidator.js    # Validação produtos
-│   │       └── storeValidator.js      # Validação lojas
-│   │
-│   ├── package.json                    # Dependências npm
-│   ├── README.md                       # Documentação backend
-│   └── .env                           # Variáveis de ambiente
-│
-├── kuvia-frontend/                     # Frontend da aplicação
-│   ├── src/
-│   │   ├── App.jsx                     # Componente raiz
-│   │   ├── App.css                     # Estilos globais
-│   │   ├── AppRouter.jsx               # Configuração de rotas
-│   │   ├── main.jsx                    # Entrada da aplicação
-│   │   ├── index.css                   # CSS base
-│   │   │
-│   │   ├── assets/                     # Recursos estáticos
-│   │   │   ├── icons/                 # Ícones SVG/PNG
-│   │   │   └── images/                # Imagens
-│   │   │
-│   │   ├── components/                 # Componentes reutilizáveis
-│   │   │   ├── common/
-│   │   │   │   ├── RatingStars.jsx
-│   │   │   │   ├── RatingStars.css
-│   │   │   │   ├── WhatsAppButton.jsx
-│   │   │   │   └── WhatsAppButton.css
-│   │   │   ├── layout/
-│   │   │   │   ├── Footer.jsx
-│   │   │   │   ├── Footer.css
-│   │   │   │   ├── Header.jsx
-│   │   │   │   ├── Sidebar.jsx
-│   │   │   │   └── ...
-│   │   │   ├── product/
-│   │   │   │   ├── ProductCard.jsx
-│   │   │   │   ├── ProductList.jsx
-│   │   │   │   ├── ProductDetails.jsx
-│   │   │   │   └── ...
-│   │   │   ├── store/
-│   │   │   │   ├── StoreCard.jsx
-│   │   │   │   ├── StoreHeader.jsx
-│   │   │   │   └── ...
-│   │   │   └── ui/
-│   │   │       ├── Button.jsx
-│   │   │       ├── Modal.jsx
-│   │   │       ├── Input.jsx
-│   │   │       ├── Loader.jsx
-│   │   │       └── ...
-│   │   │
-│   │   ├── context/                    # Context API (estado global)
-│   │   │   ├── AuthContext.jsx        # Autenticação
-│   │   │   ├── CartContext.jsx        # Carrinho de compras
-│   │   │   └── NotificationContext.jsx# Notificações
-│   │   │
-│   │   ├── hooks/                      # Custom React Hooks
-│   │   │   ├── useAuth.js             # Hook autenticação
-│   │   │   ├── useCart.js             # Hook carrinho
-│   │   │   └── useDebounce.js         # Hook debounce
-│   │   │
-│   │   ├── pages/                      # Páginas (Views)
-│   │   │   ├── admin/
-│   │   │   │   ├── Dashboard.jsx
-│   │   │   │   ├── ManageProducts.jsx
-│   │   │   │   ├── ManageOrders.jsx
-│   │   │   │   ├── Settings.jsx
-│   │   │   │   └── ...
-│   │   │   ├── customer/
-│   │   │   │   ├── Home.jsx
-│   │   │   │   ├── Checkout.jsx
-│   │   │   │   ├── Orders.jsx
-│   │   │   │   ├── Favorites.jsx
-│   │   │   │   └── ...
-│   │   │   ├── public/
-│   │   │   │   ├── Login.jsx
-│   │   │   │   ├── Register.jsx
-│   │   │   │   ├── Stores.jsx
-│   │   │   │   ├── StoreDetail.jsx
-│   │   │   │   └── ...
-│   │   │   └── seller/
-│   │   │       ├── Dashboard.jsx
-│   │   │       ├── CreateProduct.jsx
-│   │   │       ├── StoreSales.jsx
-│   │   │       └── ...
-│   │   │
-│   │   ├── services/                   # Serviços (chamadas API)
-│   │   │   ├── api.js                 # Configuração Axios
-│   │   │   ├── authService.js         # Auth API calls
-│   │   │   ├── messageService.js      # Messages API calls
-│   │   │   ├── orderService.js        # Orders API calls
-│   │   │   ├── productService.js      # Products API calls
-│   │   │   ├── storeService.js        # Stores API calls
-│   │   │   └── userService.js         # Users API calls
-│   │   │
-│   │   └── utils/                      # Utilitários
-│   │       ├── constants.js           # Constantes
-│   │       ├── formatters.js          # Formatação dados
-│   │       └── validators.js          # Validação dados
-│   │
-│   ├── public/                         # Assets públicos
-│   ├── package.json                    # Dependências npm
-│   ├── README.md                       # Documentação frontend
-│   ├── vite.config.js                 # Configuração Vite
-│   ├── tailwind.config.js             # Configuração Tailwind
-│   ├── postcss.config.js              # Configuração PostCSS
-│   ├── eslint.config.js               # Configuração ESLint
-│   ├── index.html                     # HTML raiz
-│   └── .env                           # Variáveis de ambiente
-│
-└── .gitignore                         # Ficheiros a ignorar no git
+```mermaid
+flowchart LR
+    A[React + Vite] -->|Axios / REST| B[Node.js + Express]
+    B --> C[(PostgreSQL)]
+    B --> D[Cloudinary]
 ```
 
-## 🚀 Início Rápido
+| Camada | Tecnologias |
+|---|---|
+| Frontend | React, Vite, React Router, Tailwind CSS, Axios |
+| Backend | Node.js, Express, JWT, Express Validator |
+| Dados | PostgreSQL, Sequelize |
+| Imagens | Multer, Cloudinary |
 
-### Pré-requisitos
-- Node.js (v14+)
-- npm ou yarn
-- PostgreSQL (v12+)
+## Estrutura do repositório
 
-### Instalação Backend
+```text
+Mercado_Kuvia/
+├── kuvia-backend/     # API REST, modelos e regras de negócio
+├── kuvia-frontend/    # Interface React
+└── README.md
+```
+
+## Executar localmente
+
+### 1. Backend
+
 ```bash
 cd kuvia-backend
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-### Instalação Frontend
+Edite o `.env` com a ligação PostgreSQL, a chave JWT, o endereço do frontend e as credenciais do Cloudinary.
+
+### 2. Frontend
+
 ```bash
 cd kuvia-frontend
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-### Acessar
-- Frontend: `http://localhost:5173/`
-- Backend: `http://localhost:3000/`
+Por padrão, o frontend fica em `http://localhost:5173` e a API em `http://localhost:8080`.
 
-## 📚 Documentação
+## Decisões técnicas
 
-- [Backend README](./kuvia-backend/README.md) - Detalhes do servidor
-- [Frontend README](./kuvia-frontend/README.md) - Detalhes da UI
+- Separação entre frontend e backend no mesmo repositório.
+- Autorização baseada em papéis para limitar ações por tipo de utilizador.
+- PostgreSQL como base de dados relacional e Sequelize como ORM.
+- Cloudinary para armazenamento persistente de imagens.
+- CORS configurável através de variáveis de ambiente.
 
-## 🔗 Links Importantes
+## Próximos passos
 
-- **Base de dados**: PostgreSQL
-- **Autenticação**: JWT
-- **Autorização**: Role-based (Client, Seller, Admin)
-- **Uploads**: Multer (local storage ou cloud)
+- Adicionar testes automatizados no backend e frontend.
+- Concluir o fluxo de pedidos e pagamentos móveis.
+- Implementar favoritos e mensagens entre clientes e vendedores.
+- Acrescentar documentação completa dos endpoints da API.
 
-## 📞 Suporte
+## Autor
 
-Para dúvidas ou problemas, contactar a equipa de desenvolvimento.
+Desenvolvido por [Rosário Pompilio Caravela](https://github.com/rosariocaravela), estudante de Engenharia Informática em Maputo, Moçambique.
+
